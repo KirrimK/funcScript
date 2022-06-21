@@ -1,0 +1,3 @@
+(test
+ (name fStests)
+ (libraries funcScript))

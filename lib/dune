@@ -1,0 +1,6 @@
+(library
+ (name funcScript)
+ (public_name funcScript))
+
+(menhir (modules fSparser))
+(ocamllex fSlexer)
