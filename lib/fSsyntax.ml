@@ -42,7 +42,7 @@ type stat =
   | STAT_NOOP
   | STAT_EXPR of expr
   | STAT_ASSIGN of expr list * expr list * stat
-  | STAT_MATCH of expr * (expr * expr * stat) list
+  | STAT_IF of expr * stat * stat
   | STAT_PAUSE of expr * stat
 
 and expr =
@@ -67,8 +67,8 @@ let rec stat_str = fun st ->
   match st with
   | STAT_NOOP -> "NOOP"
   | STAT_PAUSE (e, stn) -> Printf.sprintf "PAUSE (%s); %s" (expr_str e) (stat_str stn)
-  | STAT_ASSIGN (varls, vlls, stn) -> Printf.sprintf "ASSIGN (%s = %s); %s" (String.concat ", " (List.map expr_str varls)) (String.concat ", " (List.map expr_str vlls)) (stat_str stn)
-  | STAT_MATCH (_, _)  -> Printf.sprintf "MATCH"
+  | STAT_ASSIGN (varls, vlls, stn) -> Printf.sprintf "ASSIGN (%s = %s) in %s" (String.concat ", " (List.map expr_str varls)) (String.concat ", " (List.map expr_str vlls)) (stat_str stn)
+  | STAT_IF (e, sta, stb)  -> Printf.sprintf "(IF %s THEN %s ELSE %s)" (expr_str e) (stat_str sta) (stat_str stb)
   | STAT_EXPR e -> Printf.sprintf "EXPR %s" (expr_str e)
 
 and expr_str = fun ex ->

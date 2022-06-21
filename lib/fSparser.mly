@@ -3,24 +3,24 @@
 %}
 
 %token EQUAL
+%token IN
 
 %token SEMICOLON
 
 %token LPAR
 %token RPAR
 
-%token QUESTION
-%token COLONS
-
-%token VERTICAL
 %token IF
-%token ANYTHING
+%token THEN
+%token ELSE
+
+%token ANY
+%token NONE
 
 %token BEGIN
 %token END
 
 %token COMMA
-
 %token PAUSE
 
 %token <string> IDENTIFIER
@@ -73,21 +73,12 @@ main:
 stat:
   sst = simple_stat {sst}
 | PAUSE ex = expr SEMICOLON st = stat {STAT_PAUSE(ex, st)}
-| LPAR extomatch = expr RPAR QUESTION mtls = matchlist_st {STAT_MATCH(extomatch, mtls)}
+| IF ex_cond = expr THEN if_st = stat ELSE else_st = stat {STAT_IF(ex_cond, if_st, else_st)}
 
 simple_stat:
   ex = expr {STAT_EXPR(ex)}
-| SEMICOLON {STAT_NOOP}
-| exvar = expr_list EQUAL exval = expr_list SEMICOLON sstn = simple_stat {STAT_ASSIGN(exvar, exval, sstn)}
+| exvar = expr_list EQUAL exval = expr_list IN sstn = simple_stat {STAT_ASSIGN(exvar, exval, sstn)}
 | BEGIN st = stat END {st}
-
-matchlist_st:
-  melt = matchelt_st VERTICAL mtls = matchlist_st {melt::mtls}
-| melt = matchelt_st {[melt]}
-
-matchelt_st:
-  ex_test = expr IF ex_cond = expr COLONS sst = simple_stat {(ex_test, ex_cond, sst)}
-| ex_test = expr COLONS sst = simple_stat {(ex_test, EXPR_LITERAL(LITERAL_BOOL(true)), sst)}
 
 expr:
   lt = literal {EXPR_LITERAL(lt)}
@@ -102,7 +93,8 @@ expr_list:
 | ex = expr COMMA ex_ls = expr_list {ex::ex_ls}
 
 literal:
-  ANYTHING {LITERAL_ANY}
+  ANY {LITERAL_ANY}
+| NONE {LITERAL_NONE}
 | il = INTLIT {LITERAL_INT(il)}
 | bl = BOOLLIT {LITERAL_BOOL(bl)}
 | fl = FLOATLIT {LITERAL_FLOAT(fl)}

@@ -11,9 +11,7 @@ let generic_parse_test = fun test_name to_parse expected ()->
     (test_name, Error(Printexc.to_string e))
 
 let test_one_semicolon = generic_parse_test
-  "one_semicolon"
-  ";"
-  STAT_NOOP
+  "one_semicolon" ";" STAT_NOOP
 
 let () = run_tests_and_display "PARSING" [
   test_one_semicolon;

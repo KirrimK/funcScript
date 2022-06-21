@@ -24,11 +24,12 @@ rule token = parse
 | "bg" {BEGIN}
 | "nd" {END}
 | ';' {SEMICOLON}
-| '?' {QUESTION}
-| ':' {COLONS}
-| '|' {VERTICAL}
+| "else" {ELSE}
+| "then" {THEN}
 | "if" {IF}
-| '_' {ANYTHING}
+| "in" {IN}
+| '_' {ANY}
+| '#' {NONE}
 | "->" {FN}
 | "@>" {CR}
 | '+' {ADD}
