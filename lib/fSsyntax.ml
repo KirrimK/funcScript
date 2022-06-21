@@ -50,6 +50,7 @@ and expr =
   | EXPR_UNARY of un_op * expr
   | EXPR_BINARY of bin_op * expr * expr
   | EXPR_FCALL of expr * expr list
+  | EXPR_IDENTIFIER of string
 
 and lit =
   | LITERAL_ANY
@@ -74,8 +75,9 @@ and expr_str = fun ex ->
   match ex with
   | EXPR_LITERAL l -> Printf.sprintf "LITERAL %s" (lit_str l)
   | EXPR_UNARY (uo, e) -> Printf.sprintf "UNARY (%s %s)" (unop_str uo) (expr_str e)
-  | EXPR_BINARY (bo, ea, eb) -> Printf.sprintf "BINARY (%s %s %s)" (expr_str ea) (binop_str bo) (expr_str eb)
+  | EXPR_BINARY (bo, ea, eb) -> Printf.sprintf "BINARY ((%s) %s (%s))" (expr_str ea) (binop_str bo) (expr_str eb)
   | EXPR_FCALL (ef, argls) -> Printf.sprintf "FCALL (%s(%s))" (expr_str ef) (String.concat ", " (List.map expr_str argls))
+  | EXPR_IDENTIFIER id -> Printf.sprintf "IDENTIFIER %s" id
 
 and lit_str = fun l ->
   match l with

@@ -24,6 +24,7 @@ and expr =
   | EXPR_UNARY of un_op * expr
   | EXPR_BINARY of bin_op * expr * expr
   | EXPR_FCALL of expr * expr list
+  | EXPR_IDENTIFIER of string
 and lit =
     LITERAL_ANY
   | LITERAL_INT of int
