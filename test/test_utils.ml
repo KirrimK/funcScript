@@ -1,5 +1,13 @@
 (* Test_utils.ml *)
 
+let generic_test = fun function_to_test test_name input expected ()->
+  try
+    let output = function_to_test input in
+    let is_as_expected = (output = expected) in
+    (test_name, Ok(is_as_expected))
+  with e ->
+    (test_name, Error(Printexc.to_string e))
+
 let run_tests_and_display = fun test_type_str test_list ->
   Printf.printf "Running tests [%s]\n" test_type_str;
   let total_tests = List.length test_list in
