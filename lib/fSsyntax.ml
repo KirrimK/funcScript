@@ -54,12 +54,11 @@ and expr =
   | EXPR_IDENTIFIER of string
 
 and lit =
-  | LITERAL_ANY
   | LITERAL_INT of int
   | LITERAL_FLOAT of float
   | LITERAL_STRING of string
   | LITERAL_BOOL of bool
-  | LITERAL_LIST of lit list
+  | LITERAL_LIST of expr list
   | LITERAL_FUNCTION of string list * stat
   | LITERAL_COROUTINE of string list * stat
   | LITERAL_NONE
@@ -83,12 +82,11 @@ and expr_str = fun ex ->
 
 and lit_str = fun l ->
   match l with
-  | LITERAL_ANY -> "ANY"
   | LITERAL_NONE -> "NONE"
   | LITERAL_INT i -> Printf.sprintf "INT %d" i
   | LITERAL_BOOL b -> Printf.sprintf "BOOL %b" b
   | LITERAL_FLOAT f -> Printf.sprintf "FLOAT %f" f
   | LITERAL_STRING s -> Printf.sprintf "STRING %s" s
-  | LITERAL_LIST ll -> Printf.sprintf "LIST [%s]" (String.concat ", " (List.map lit_str ll))
+  | LITERAL_LIST ll -> Printf.sprintf "LIST [%s]" (String.concat ", " (List.map expr_str ll))
   | LITERAL_FUNCTION (args, stf) -> Printf.sprintf "(%s -> %s)" (String.concat ", " args) (stat_str stf)
   | LITERAL_COROUTINE (args, stf) -> Printf.sprintf "(%s @> %s)" (String.concat ", " args) (stat_str stf)

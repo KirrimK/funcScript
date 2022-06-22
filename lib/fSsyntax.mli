@@ -27,12 +27,11 @@ and expr =
   | EXPR_FCALL of expr * expr list
   | EXPR_IDENTIFIER of string
 and lit =
-    LITERAL_ANY
   | LITERAL_INT of int
   | LITERAL_FLOAT of float
   | LITERAL_STRING of string
   | LITERAL_BOOL of bool
-  | LITERAL_LIST of lit list
+  | LITERAL_LIST of expr list
   | LITERAL_FUNCTION of string list * stat
   | LITERAL_COROUTINE of string list * stat
   | LITERAL_NONE

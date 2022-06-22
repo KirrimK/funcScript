@@ -10,11 +10,13 @@
 %token LPAR
 %token RPAR
 
+%token LSQB
+%token RSQB
+
 %token IF
 %token THEN
 %token ELSE
 
-%token ANY
 %token NONE
 
 %token BEGIN
@@ -89,25 +91,28 @@ expr:
 | exa = expr bo = bin_op exb = expr {EXPR_BINARY(bo, exa, exb)}
 | exf = expr LPAR RPAR {EXPR_FCALL(exf, [])}
 | exf = expr LPAR ex_ls = expr_list RPAR {EXPR_FCALL(exf, ex_ls)}
+| LPAR ex = expr RPAR {ex}
 
 expr_list:
   ex = expr {[ex]}
 | ex = expr COMMA ex_ls = expr_list {ex::ex_ls}
 
 literal:
-  ANY {LITERAL_ANY}
 | NONE {LITERAL_NONE}
 | il = INTLIT {LITERAL_INT(il)}
 | bl = BOOLLIT {LITERAL_BOOL(bl)}
 | fl = FLOATLIT {LITERAL_FLOAT(fl)}
 | st = STRINGLIT {LITERAL_STRING(st)}
+| LPAR FN st = stat RPAR {LITERAL_FUNCTION([], st)}
 | LPAR id_ls = id_list FN st = stat RPAR {LITERAL_FUNCTION(id_ls, st)}
+| LPAR CR st = stat RPAR {LITERAL_COROUTINE([], st)}
 | LPAR id_ls = id_list CR st = stat RPAR {LITERAL_COROUTINE(id_ls, st)}
-
+| LSQB RSQB {LITERAL_LIST([])}
+| LSQB ex_ls = expr_list RSQB {LITERAL_LIST(ex_ls)}
 
 id_list:
   id = IDENTIFIER {[id]}
-| id = IDENTIFIER id_ls = id_list {id::id_ls}
+| id = IDENTIFIER COMMA id_ls = id_list {id::id_ls}
 
 %inline un_op:
   NOT {Not}

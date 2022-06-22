@@ -21,6 +21,8 @@ rule token = parse
 | '=' { EQUAL }
 | '(' {LPAR}
 | ')' {RPAR}
+| '[' {LSQB}
+| ']' {RSQB}
 | "bg" {BEGIN}
 | "nd" {END}
 | ';' {SEMICOLON}
@@ -28,7 +30,6 @@ rule token = parse
 | "then" {THEN}
 | "if" {IF}
 | "in" {IN}
-| '_' {ANY}
 | '#' {NONE}
 | "->" {FN}
 | "@>" {CR}
