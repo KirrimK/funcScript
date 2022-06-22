@@ -19,6 +19,7 @@ type stat =
   | STAT_ASSIGN of expr list * expr list * stat
   | STAT_IF of expr * stat * stat
   | STAT_PAUSE of expr * stat
+  | STAT_DROPVALUE of expr * stat
 and expr =
     EXPR_LITERAL of lit
   | EXPR_UNARY of un_op * expr

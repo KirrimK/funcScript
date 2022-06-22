@@ -31,6 +31,7 @@
 
 %token FN
 %token CR
+%token AT
 
 %token SAME
 %token DIFFERENT
@@ -72,13 +73,14 @@ main:
 
 stat:
   sst = simple_stat {sst}
-| PAUSE ex = expr SEMICOLON st = stat {STAT_PAUSE(ex, st)}
+| PAUSE ex = expr AT st = stat {STAT_PAUSE(ex, st)}
 | IF ex_cond = expr THEN if_st = stat ELSE else_st = stat {STAT_IF(ex_cond, if_st, else_st)}
 
 simple_stat:
   ex = expr {STAT_EXPR(ex)}
-| exvar = expr_list EQUAL exval = expr_list IN sstn = simple_stat {STAT_ASSIGN(exvar, exval, sstn)}
+| exvar = expr_list EQUAL exval = expr_list IN stn = stat {STAT_ASSIGN(exvar, exval, stn)}
 | BEGIN st = stat END {st}
+| ex = expr SEMICOLON stn = stat {STAT_DROPVALUE(ex, stn)}
 
 expr:
   lt = literal {EXPR_LITERAL(lt)}

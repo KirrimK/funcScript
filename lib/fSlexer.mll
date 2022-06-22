@@ -32,6 +32,7 @@ rule token = parse
 | '#' {NONE}
 | "->" {FN}
 | "@>" {CR}
+| '@' {AT}
 | '+' {ADD}
 | '-' {SUB}
 | '*' {MULT}
