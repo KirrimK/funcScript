@@ -97,10 +97,10 @@ left/right|None  |Bool  |Int   |Float|String|List  |Function|Coroutine
 ----------|------|------|------|-----|------|------|--------|---------
 None      |X     |X     |X     |X    |X     |X     |X       |X 
 Bool      |X     |X     |X     |X    |X     |X     |X       |X
-Int       |X     |X     |floor division|X|X |X     |X       |X
-Float     |X     |X     |X     |division|X  |X     |X       |X
+Int       |X     |X     |substraction|X|X   |X     |X       |X
+Float     |X     |X     |X     |substraction|X|X   |X       |X
 String    |X     |X     |X     |X    |X     |X     |X       |X
-List      |X     |X     |X     |X    |X     |X     |X       |X
+List      |X     |X     |X     |X    |X     |remove items from left that are present in right|X|X
 Function  |X     |X     |X     |X    |X     |X     |X       |X
 Coroutine |X     |X     |X     |X    |X     |X     |X       |X
 
@@ -121,10 +121,10 @@ left/right|None  |Bool  |Int   |Float|String|List  |Function|Coroutine
 ----------|------|------|------|-----|------|------|--------|---------
 None      |X     |X     |X     |X    |X     |X     |X       |X 
 Bool      |X     |X     |X     |X    |X     |X     |X       |X
-Int       |X     |X     |substraction|X|X   |X     |X       |X
-Float     |X     |X     |X     |substraction|X|X   |X       |X
+Int       |X     |X     |floor division|X|X |X     |X       |X
+Float     |X     |X     |X     |division|X  |X     |X       |X
 String    |X     |X     |X     |X    |X     |X     |X       |X
-List      |X     |X     |X     |X    |X     |remove items from left that are present in right|X|X
+List      |X     |X     |X     |X    |X     |X     |X       |X
 Function  |X     |X     |X     |X    |X     |X     |X       |X
 Coroutine |X     |X     |X     |X    |X     |X     |X       |X
 
