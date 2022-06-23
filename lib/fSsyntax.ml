@@ -18,6 +18,7 @@ type bin_op =
 | Gt
 | Let
 | Get
+| Head
 
 let unop_str = fun o ->
   match o with
@@ -37,6 +38,7 @@ let binop_str = fun o ->
   | Gt -> "Gt"
   | Let -> "Let"
   | Get -> "Get"
+  | Head -> "Head"
 
 type stat =
   | STAT_NOOP

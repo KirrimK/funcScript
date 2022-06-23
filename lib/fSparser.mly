@@ -48,6 +48,7 @@
 %token MULT
 %token DIV
 %token MOD
+%token HEAD
 
 %token NOT
 
@@ -57,6 +58,8 @@
 
 %left SAME DIFFERENT 
 %left LT LET GT GET
+
+%right HEAD
 
 %left ADD SUB
 %left MULT DIV MOD
@@ -130,3 +133,4 @@ id_list:
 | GT {Gt}
 | LET {Let}
 | GET {Get}
+| HEAD {Head}

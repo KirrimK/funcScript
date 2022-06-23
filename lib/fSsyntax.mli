@@ -11,6 +11,7 @@ type bin_op =
   | Gt
   | Let
   | Get
+  | Head
 val unop_str : un_op -> string
 val binop_str : bin_op -> string
 type stat =

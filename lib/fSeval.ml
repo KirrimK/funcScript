@@ -61,7 +61,7 @@ and eval_expr = fun context expr ->
     | None -> failwith (Printf.sprintf "Error while evaluating [%s]: variable '%s' not found" (expr_str expr) id)
 
 and destructure_assign = fun context varls expr_vl_ls->
-  Printf.printf "DESCTRUCTURING\n\\%s\n\\%s\n" (String.concat ", " (List.map expr_str varls)) (String.concat ", " (List.map eval_obj_str expr_vl_ls));
+  (*Printf.printf "DESCTRUCTURING\n\\%s\n\\%s\n" (String.concat ", " (List.map expr_str varls)) (String.concat ", " (List.map eval_obj_str expr_vl_ls));*)
   let rec assign_values = fun vars values ->
     match vars, values with
     | [], [] -> ()
@@ -71,6 +71,11 @@ and destructure_assign = fun context varls expr_vl_ls->
     | (EXPR_LITERAL(LITERAL_LIST l))::tlv, [] -> assign_values l [];
                                                   assign_values tlv []
     | (EXPR_IDENTIFIER i)::tlv, hde::tle -> Hashtbl.add context.variables i hde; assign_values tlv tle
+    | (EXPR_BINARY(Head, EXPR_IDENTIFIER hdi, tli))::tlv, Eval_List(hdhde::tlhde)::tle ->
+      Hashtbl.add context.variables hdi hdhde;
+      destructure_assign context [tli] [Eval_List(tlhde)];
+      assign_values tlv tle;
+    | (EXPR_LITERAL(LITERAL_NONE))::tlv, _::tle -> assign_values tlv tle
     | (EXPR_LITERAL(LITERAL_LIST l))::tlv, (Eval_List el)::tle -> destructure_assign context l el; assign_values tlv tle
     | _, _ -> failwith "assignment unsupported" in
   assign_values varls expr_vl_ls
@@ -146,6 +151,7 @@ and binary_op = fun bo el er ->
   | Gt, Eval_Float fl, Eval_Float fr -> Eval_Bool((compare fl fr)>1)
   | Let, Eval_Float fl, Eval_Float fr -> Eval_Bool((compare fl fr)<1||(compare fl fr)=0)
   | Get, Eval_Float fl, Eval_Float fr -> Eval_Bool((compare fl fr)>1||(compare fl fr)=0)
+  | Head, a, Eval_List lsrt when a <> Eval_None -> Eval_List(a::lsrt)
   | _, _, _ -> failwith "unsupported"
 
 and functioncall = fun context ef eal ->

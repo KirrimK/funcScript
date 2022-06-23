@@ -31,6 +31,7 @@ rule token = parse
 | "if" {IF}
 | "in" {IN}
 | '#' {NONE}
+| "::" {HEAD}
 | "->" {FN}
 | "@>" {CR}
 | '@' {AT}
