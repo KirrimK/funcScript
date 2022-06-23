@@ -1,6 +1,7 @@
 (* FStypes.ml *)
 
 type type_obj = 
+  | Any_t
   | None_t
   | Int_t
   | Float_t
@@ -12,6 +13,7 @@ type type_obj =
 
 let rec type_obj_str = fun tp ->
   match tp with
+  | Any_t -> "Any_t"
   | None_t -> "None_t"
   | Int_t -> "Int_t"
   | Float_t -> "Float_t"
