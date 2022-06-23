@@ -79,7 +79,7 @@ and syntax_lit_to_obj = fun context l ->
   | LITERAL_FLOAT f -> Eval_Float f
   | LITERAL_BOOL b -> Eval_Bool b
   | LITERAL_STRING s -> Eval_String s
-  | LITERAL_LIST _ -> failwith "unsupported"
+  | LITERAL_LIST l -> Eval_List (List.map (eval_expr context) l)
   | LITERAL_FUNCTION (argnames, stf) -> Eval_Function (argnames,[], stf)
   | LITERAL_COROUTINE (argnames, stf) -> Eval_Coroutine (argnames,[], stf, copy_context context)
   | LITERAL_NONE -> Eval_None

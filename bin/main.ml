@@ -9,4 +9,6 @@ let () =
   Printf.printf "(Heredoc) > %!";
   let input = read_stdin "" in
   let synt = parse_syntax input in
-  Printf.printf "%s" (syntax_to_string synt)
+  Printf.printf "%s\n" (syntax_to_string synt);
+  let (_, vl) = eval_syntax (new_std_context ()) synt in
+  Printf.printf "%s" (obj_to_string vl)
