@@ -7,12 +7,11 @@ and eval_obj =
   | Eval_Bool of bool
   | Eval_List of eval_obj list
   | Eval_Function of string list * eval_obj list * FSsyntax.stat
-  | Eval_Coroutine of string list * eval_obj list * FSsyntax.stat *
+  | Eval_Coroutine of string list * eval_obj list * FSsyntax.stat list ref *
       eval_context
-  | Eval_OCaml_Function of eval_obj list * (eval_obj list -> eval_obj) *
-      FStypes.type_obj list * FStypes.type_obj
-  | Eval_OCaml_Coroutine of eval_obj list * (eval_obj list -> eval_obj) *
-      eval_context * FStypes.type_obj list * FStypes.type_obj
+  | Eval_OCaml_Function of eval_obj list *
+      (eval_context -> eval_obj list -> eval_obj) * FStypes.type_obj list *
+      FStypes.type_obj
 val eval_obj_str : eval_obj -> string
 val copy_context : eval_context -> eval_context
 val eval_stat : eval_context -> FSsyntax.stat -> eval_context * eval_obj
