@@ -12,7 +12,7 @@ and eval_obj =
   | Eval_OCaml_Function of eval_obj list * (eval_obj list -> eval_obj) *
       FStypes.type_obj list * FStypes.type_obj
   | Eval_OCaml_Coroutine of eval_obj list * (eval_obj list -> eval_obj) *
-      FStypes.type_obj list * FStypes.type_obj
+      eval_context * FStypes.type_obj list * FStypes.type_obj
 val eval_obj_str : eval_obj -> string
 val copy_context : eval_context -> eval_context
 val eval_stat : eval_context -> FSsyntax.stat -> eval_context * eval_obj
@@ -23,3 +23,5 @@ val is_truthy : eval_obj -> bool
 val syntax_lit_to_obj : eval_context -> FSsyntax.lit -> eval_obj
 val unary_op : FSsyntax.un_op -> eval_obj -> eval_obj
 val binary_op : FSsyntax.bin_op -> eval_obj -> eval_obj -> eval_obj
+val functioncall :
+  eval_context -> FSsyntax.expr -> FSsyntax.expr list -> eval_obj

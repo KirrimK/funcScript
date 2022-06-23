@@ -17,7 +17,7 @@ and eval_obj =
   | Eval_Function of string list * eval_obj list * stat
   | Eval_Coroutine of string list * eval_obj list * stat * eval_context
   | Eval_OCaml_Function of eval_obj list * (eval_obj list -> eval_obj) * (*typing*) type_obj list * type_obj
-  | Eval_OCaml_Coroutine of eval_obj list * (eval_obj list -> eval_obj) *(*typing*) type_obj list * type_obj
+  | Eval_OCaml_Coroutine of eval_obj list * (eval_obj list -> eval_obj) * eval_context *(*typing*) type_obj list * type_obj
 
 let rec eval_obj_str = fun obj ->
   match obj with
@@ -30,7 +30,7 @@ let rec eval_obj_str = fun obj ->
   | Eval_Function(_, _, _) -> "Function"
   | Eval_Coroutine(_, _, _, _) -> "Coroutine"
   | Eval_OCaml_Function(_, _, tpins, tpout) -> Printf.sprintf "(OCaml %s)" (type_obj_str (Function_t (tpins, tpout)))
-  | Eval_OCaml_Coroutine(_, _, tpins, tpout) -> Printf.sprintf "(OCaml %s)" (type_obj_str (Coroutine_t (tpins, tpout)))
+  | Eval_OCaml_Coroutine(_, _, _, tpins, tpout) -> Printf.sprintf "(OCaml %s)" (type_obj_str (Coroutine_t (tpins, tpout)))
 
 let copy_context = fun context ->
   {variables = Hashtbl.copy (context.variables)}
@@ -57,7 +57,7 @@ and eval_expr = fun context expr ->
   | EXPR_LITERAL l -> syntax_lit_to_obj context l
   | EXPR_UNARY (uo, e) -> unary_op uo (eval_expr context e)
   | EXPR_BINARY (bo, ea, eb) -> binary_op bo (eval_expr context ea) (eval_expr context eb)
-  | EXPR_FCALL ((*ef, eal*)_, _) -> failwith "unsupported"
+  | EXPR_FCALL (ef, eal) -> functioncall context ef eal
   | EXPR_IDENTIFIER id -> match Hashtbl.find_opt context.variables id with
     | Some v -> v
     | None -> failwith (Printf.sprintf "Error while evaluating [%s]: variable '%s' not found" (expr_str expr) id)
@@ -137,3 +137,22 @@ and binary_op = fun bo el er ->
   | Let, Eval_Float fl, Eval_Float fr -> Eval_Bool((compare fl fr)<1||(compare fl fr)=0)
   | Get, Eval_Float fl, Eval_Float fr -> Eval_Bool((compare fl fr)>1||(compare fl fr)=0)
   | _, _, _ -> failwith "unsupported"
+
+and functioncall = fun context ef eal ->
+  let evl = eval_expr context ef in
+  let vl_ls = List.map (eval_expr context) eal in
+  match evl with
+  | Eval_Function (argnames, preargs, stf) ->
+    let tot_args = List.append preargs vl_ls in
+    if List.length tot_args < List.length argnames then
+      Eval_Function (argnames, tot_args, stf)
+    else if List.length tot_args > List.length argnames then
+      failwith "too much arguments in function call"
+    else
+      let new_context = copy_context context in
+      let () = List.iter2 (fun id vl -> Hashtbl.add new_context.variables id vl) argnames tot_args in
+      let (_, res) = eval_stat new_context stf in res
+  (*| Eval_OCaml_Function (preargs, func, tpins, tpout) -> failwith "unsupported"
+  | Eval_Coroutine (argnames, preargs, stf, loc_ctx) -> failwith "unsupported"
+  | Eval_OCaml_Coroutine (preargs, func, loc_ctx, tpins, tpout) -> failwith "unsupported"*)
+  | _ -> failwith "tried to call a non-callable"
