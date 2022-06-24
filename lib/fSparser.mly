@@ -73,8 +73,13 @@
 %%
 
 main:
-  st = stat EOF {st}
+  st = toplevel_stat EOF {st}
 | EOF {STAT_NOOP}
+
+toplevel_stat:
+  st = stat {st}
+| exvar = expr_list EQUAL exval = expr_list SEMICOLON SEMICOLON stn = stat{STAT_ASSIGN(exvar, exval, stn)}
+| exvar = expr_list EQUAL exval = expr_list SEMICOLON SEMICOLON {STAT_ASSIGN_TOPLEVEL(exvar, exval)}
 
 stat:
   sst = simple_stat {sst}

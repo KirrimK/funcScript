@@ -9,6 +9,7 @@ type eval_context = {
 
 and eval_obj =
   | Eval_None
+  | Eval_None_Toplevel
   | Eval_Int of int
   | Eval_Float of float
   | Eval_String of string
@@ -21,6 +22,7 @@ and eval_obj =
 let rec eval_obj_str = fun obj ->
   match obj with
   | Eval_None -> "None"
+  | Eval_None_Toplevel -> "None_Toplevel"
   | Eval_Int i -> Printf.sprintf "%d" i
   | Eval_Float f -> Printf.sprintf "%f" f
   | Eval_Bool b -> Printf.sprintf "%b" b
@@ -41,6 +43,9 @@ let rec eval_stat = fun context stat ->
   | STAT_ASSIGN (varls, expr_ls, stn)-> let expr_vl_ls = List.map (eval_expr context) expr_ls in
     destructure_assign context varls expr_vl_ls;
     eval_stat context stn
+  | STAT_ASSIGN_TOPLEVEL (varls, expr_ls) -> let expr_vl_ls = List.map (eval_expr context) expr_ls in
+    destructure_assign context varls expr_vl_ls;
+    (context, Eval_None_Toplevel)
   | STAT_IF (e, sti, ste) -> let e_vl = eval_expr context e in
     if (is_truthy e_vl) = true then
       eval_stat context sti

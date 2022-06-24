@@ -1,6 +1,7 @@
 type eval_context = { mutable variables : (string, eval_obj) Hashtbl.t; }
 and eval_obj =
     Eval_None
+  | Eval_None_Toplevel
   | Eval_Int of int
   | Eval_Float of float
   | Eval_String of string

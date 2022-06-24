@@ -44,6 +44,7 @@ type stat =
   | STAT_NOOP
   | STAT_EXPR of expr
   | STAT_ASSIGN of expr list * expr list * stat
+  | STAT_ASSIGN_TOPLEVEL of expr list * expr list
   | STAT_IF of expr * stat * stat
   | STAT_PAUSE of expr * stat
   | STAT_DROPVALUE of expr * stat
@@ -73,6 +74,7 @@ let rec stat_str = fun st ->
   | STAT_IF (e, sta, stb)  -> Printf.sprintf "(IF %s THEN %s ELSE %s)" (expr_str e) (stat_str sta) (stat_str stb)
   | STAT_EXPR e -> Printf.sprintf "EXPR (%s)" (expr_str e)
   | STAT_DROPVALUE (ex, stn) -> Printf.sprintf "DROPVALUE (%s; %s)" (expr_str ex) (stat_str stn)
+  | STAT_ASSIGN_TOPLEVEL(varls, vlls) -> Printf.sprintf "ASSIGN_TOPLEVEL (%s = %s)" (String.concat ", " (List.map expr_str varls)) (String.concat ", " (List.map expr_str vlls))
 
 and expr_str = fun ex ->
   match ex with

@@ -18,6 +18,7 @@ type stat =
     STAT_NOOP
   | STAT_EXPR of expr
   | STAT_ASSIGN of expr list * expr list * stat
+  | STAT_ASSIGN_TOPLEVEL of expr list * expr list
   | STAT_IF of expr * stat * stat
   | STAT_PAUSE of expr * stat
   | STAT_DROPVALUE of expr * stat
