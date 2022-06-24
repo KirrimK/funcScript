@@ -1,4 +1,7 @@
-type eval_context = { mutable variables : (string, eval_obj) Hashtbl.t; }
+type eval_context = {
+  mutable variables : (string, eval_obj) Hashtbl.t;
+  mutable types : (string, FStypes.type_obj) Hashtbl.t;
+}
 and eval_obj =
     Eval_None
   | Eval_None_Toplevel

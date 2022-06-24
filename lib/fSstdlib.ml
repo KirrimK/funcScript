@@ -2,7 +2,10 @@
 
 open FSeval;;
 
-let std_context = {variables = Hashtbl.create 100}
+let std_context = {
+    variables = Hashtbl.create 50;
+    types = Hashtbl.create 50;
+  }
 
 let fs_print = Eval_OCaml_Function([], 
   (fun _ objls -> 

@@ -4,7 +4,8 @@ open FSsyntax;;
 open FStypes;;
 
 type eval_context = {
-  mutable variables: (string, eval_obj) Hashtbl.t
+  mutable variables: (string, eval_obj) Hashtbl.t;
+  mutable types: (string, type_obj) Hashtbl.t
 }
 
 and eval_obj =
@@ -33,7 +34,10 @@ let rec eval_obj_str = fun obj ->
   | Eval_OCaml_Function(_, _, tpins, tpout) -> Printf.sprintf "(OCaml %s)" (type_obj_str (Function_t (tpins, tpout)))
 
 let copy_context = fun context ->
-  {variables = Hashtbl.copy (context.variables)}
+  {
+    variables = Hashtbl.copy (context.variables);
+    types = Hashtbl.copy (context.types);
+  }
 
 let rec eval_stat = fun context stat ->
   match stat with
