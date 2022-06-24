@@ -6,12 +6,12 @@ let std_context = {variables = Hashtbl.create 100}
 
 let fs_print = Eval_OCaml_Function([], 
   (fun _ objls -> 
-    Printf.printf "%s" (eval_obj_str (List.hd objls));
+    Printf.printf "%s%!" (eval_obj_str (List.hd objls));
     Eval_None),
   [Any_t], None_t);;
 let fs_println = Eval_OCaml_Function([], 
   (fun _ objls -> 
-    Printf.printf "%s\n" (eval_obj_str (List.hd objls));
+    Printf.printf "%s\n%!" (eval_obj_str (List.hd objls));
     Eval_None),
   [Any_t], None_t);;
 
