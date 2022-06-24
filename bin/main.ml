@@ -15,7 +15,11 @@ let () =
     let input = ref "" in
     let synt = ref (parse_syntax "") in
     while not !finished_input do
-      input := !input ^ (read_line());
+      let temp = read_line() in
+      let () = if temp = "flush" then
+        begin input := ""; finished_input := true; end
+      else
+        input := !input ^ (temp) in
       try
         synt := parse_syntax !input;
         finished_input := true;
@@ -28,6 +32,6 @@ let () =
       ctx := new_ctx;
       if vl <> Eval_None_Toplevel then
         Printf.printf "- :%s\n" (obj_to_string vl);
-    with e ->
-      Printf.printf "\n%s\n" (Printexc.to_string e)
+    with Failure f ->
+      Printf.printf "%s\n" (f)
   done
