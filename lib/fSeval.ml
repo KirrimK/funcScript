@@ -4,8 +4,7 @@ open FSsyntax;;
 open FStypes;;
 
 type eval_context = {
-  mutable variables: (string, eval_obj) Hashtbl.t;
-  mutable types: (string, type_obj) Hashtbl.t
+  mutable variables: (string, eval_obj) Hashtbl.t
 }
 
 and eval_obj =
@@ -17,7 +16,6 @@ and eval_obj =
   | Eval_Bool of bool
   | Eval_List of eval_obj list
   | Eval_Function of string list * eval_obj list * stat
-  | Eval_Coroutine of string list * eval_obj list * stat list ref * eval_context
   | Eval_OCaml_Function of eval_obj list * (eval_context -> eval_obj list -> eval_obj) * (*typing*) type_obj list * type_obj
 
 let rec eval_obj_str = fun obj ->
@@ -30,13 +28,11 @@ let rec eval_obj_str = fun obj ->
   | Eval_String s -> Printf.sprintf "\"%s\""s
   | Eval_List l -> Printf.sprintf "[%s]" (String.concat ", " (List.map eval_obj_str l))
   | Eval_Function(_, _, _) -> "Function"
-  | Eval_Coroutine(_, _, _, _) -> "Coroutine"
   | Eval_OCaml_Function(_, _, tpins, tpout) -> Printf.sprintf "(OCaml %s)" (type_obj_str (Function_t (tpins, tpout)))
 
 let copy_context = fun context ->
   {
     variables = Hashtbl.copy (context.variables);
-    types = Hashtbl.copy (context.types);
   }
 
 let rec eval_stat = fun context stat ->
@@ -55,7 +51,6 @@ let rec eval_stat = fun context stat ->
       eval_stat context sti
     else
       eval_stat context ste
-  | STAT_PAUSE ((*s, stn*)_, _) -> failwith "unsupported"
   | STAT_DROPVALUE (e, stn) -> let _ = eval_expr context e in
       eval_stat context stn
 
@@ -105,7 +100,6 @@ and syntax_lit_to_obj = fun context l ->
   | LITERAL_STRING s -> Eval_String s
   | LITERAL_LIST l -> Eval_List (List.map (eval_expr context) l)
   | LITERAL_FUNCTION (argnames, stf) -> Eval_Function (argnames,[], stf)
-  | LITERAL_COROUTINE (argnames, stf) -> Eval_Coroutine (argnames,[], ref [stf], copy_context context)
   | LITERAL_NONE -> Eval_None
 
 and unary_op = fun uo vl ->
@@ -186,16 +180,4 @@ and functioncall = fun context ef eal ->
     else
       let new_context = copy_context context in
       func new_context tot_args
-  | Eval_Coroutine (argnames, preargs, stflsr, loc_ctx) ->
-    let tot_args = List.append preargs vl_ls in
-    if List.length tot_args < List.length argnames then
-      Eval_Coroutine (argnames, tot_args, stflsr, loc_ctx)
-    else if List.length tot_args > List.length argnames then
-      failwith "too much arguments in function call"
-    else
-      if !stflsr = [] then (*Coroutine is finished*)
-        failwith "coroutine is already finished"
-      else
-        (*let () = List.iter2 (fun id vl -> Hashtbl.add new_context.variables id vl) argnames tot_args in
-        let (_, res) = eval_stat new_context stf in res*) failwith "coroutines unsupported"
   | _ -> failwith "tried to call a non-callable"

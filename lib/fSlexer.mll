@@ -17,7 +17,6 @@ let name = (letter | other) (letter | digit | other)*
 rule token = parse
   "true" { BOOLLIT true }
 | "false" { BOOLLIT false }
-| "pause" {PAUSE}
 | '=' { EQUAL }
 | '(' {LPAR}
 | ')' {RPAR}
@@ -33,8 +32,6 @@ rule token = parse
 | '#' {NONE}
 | "::" {HEAD}
 | "->" {FN}
-| "@>" {CR}
-| '@' {AT}
 | '+' {ADD}
 | '-' {SUB}
 | '*' {MULT}

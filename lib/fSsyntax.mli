@@ -20,7 +20,6 @@ type stat =
   | STAT_ASSIGN of expr list * expr list * stat
   | STAT_ASSIGN_TOPLEVEL of expr list * expr list
   | STAT_IF of expr * stat * stat
-  | STAT_PAUSE of expr * stat
   | STAT_DROPVALUE of expr * stat
 and expr =
     EXPR_LITERAL of lit
@@ -35,7 +34,6 @@ and lit =
   | LITERAL_BOOL of bool
   | LITERAL_LIST of expr list
   | LITERAL_FUNCTION of string list * stat
-  | LITERAL_COROUTINE of string list * stat
   | LITERAL_NONE
 val stat_str : stat -> string
 val expr_str : expr -> string

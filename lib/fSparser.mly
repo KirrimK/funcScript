@@ -23,7 +23,6 @@
 %token END
 
 %token COMMA
-%token PAUSE
 
 %token <string> IDENTIFIER
 %token <string> STRINGLIT
@@ -32,8 +31,6 @@
 %token <bool> BOOLLIT
 
 %token FN
-%token CR
-%token AT
 
 %token SAME
 %token DIFFERENT
@@ -83,7 +80,6 @@ toplevel_stat:
 
 stat:
   sst = simple_stat {sst}
-| PAUSE ex = expr AT st = stat {STAT_PAUSE(ex, st)}
 | IF ex_cond = expr THEN if_st = stat ELSE else_st = stat {STAT_IF(ex_cond, if_st, else_st)}
 
 simple_stat:
@@ -113,8 +109,6 @@ literal:
 | st = STRINGLIT {LITERAL_STRING(st)}
 | LPAR FN st = stat RPAR {LITERAL_FUNCTION([], st)}
 | LPAR id_ls = id_list FN st = stat RPAR {LITERAL_FUNCTION(id_ls, st)}
-| LPAR CR st = stat RPAR {LITERAL_COROUTINE([], st)}
-| LPAR id_ls = id_list CR st = stat RPAR {LITERAL_COROUTINE(id_ls, st)}
 | LSQB RSQB {LITERAL_LIST([])}
 | LSQB ex_ls = expr_list RSQB {LITERAL_LIST(ex_ls)}
 

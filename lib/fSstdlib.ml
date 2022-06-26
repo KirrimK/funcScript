@@ -1,11 +1,20 @@
 (* FSstdlib.ml *)
 
 open FSeval;;
+open FStypes;;
+open FStyping;;
 
 let std_context = {
     variables = Hashtbl.create 50;
-    types = Hashtbl.create 50;
   }
+
+let fs_type = Eval_OCaml_Function([],
+  (fun _ objls ->
+    Eval_String(type_obj_str (get_type_of_obj (List.hd objls)))
+    ),
+  [Any_t], String_t);;
+
+Hashtbl.add std_context.variables "type" fs_type;;
 
 let fs_print = Eval_OCaml_Function([], 
   (fun _ objls -> 

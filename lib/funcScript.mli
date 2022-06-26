@@ -4,3 +4,5 @@ val new_std_context: unit -> FSeval.eval_context
 val copy_context : FSeval.eval_context -> FSeval.eval_context
 val eval_syntax : FSeval.eval_context -> FSsyntax.stat -> FSeval.eval_context * FSeval.eval_obj
 val obj_to_string : FSeval.eval_obj -> string
+val type_of_obj : FSeval.eval_obj -> FStypes.type_obj
+val type_to_string : FStypes.type_obj -> string

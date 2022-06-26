@@ -31,7 +31,7 @@ let () =
       let (new_ctx, vl) = eval_syntax !ctx !synt in
       ctx := new_ctx;
       if vl <> Eval_None_Toplevel then
-        Printf.printf "- :%s\n" (obj_to_string vl);
+        Printf.printf "%s\t:%s\n" (type_to_string (type_of_obj vl)) (obj_to_string vl);
     with Failure f ->
       Printf.printf "%s\n" (f)
   done

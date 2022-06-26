@@ -11,10 +11,8 @@ A simplistic embeddable purely functional scripting language
 - float
 - bool
 - string
-- 'a list
-- function ()
-- coroutine
-
+- list
+- function
 All objects are first-class.
 The type of an object can be checked at runtime with the ```type``` function.
 
@@ -57,16 +55,6 @@ Partial calling of a function is allowed, and returns a function waiting for the
 ) in ...
 ```
 
-#### Declaring a coroutine
-```
-<coroutine_name> = (<arg>, <arg>, ... @>
-    <statement>
-) in ...
-```
-
-Coroutines can pause their execution by calling ```pause <expr> @ ...```.
-This will cause the coroutine to register its current state and return the result of ```<expr>``` to the point of calling. Call the same coroutine again to resume its execution.
-
 #### Declaring a block
 
 A statement can be encased in a block:
@@ -81,64 +69,59 @@ Here are tables detailing the operations for each operator.
 X means that the operation is not supported.
 
 #### Operator ```+```
-left/right|None  |Bool  |Int   |Float|String|List  |Function|Coroutine
-----------|------|------|------|-----|------|------|--------|---------
-None      |X     |X     |X     |X    |X     |X     |X       |X 
-Bool      |X     |boolean OR|X |X    |X     |X     |X       |X
-Int       |X     |X     |addition|X  |X     |X     |X       |X
-Float     |X     |X     |X     |addition|X  |X     |X       |X
-String    |X     |X     |X     |X    |concatenation|X|X     |X
-List      |X     |X     |X     |X    |X     |concatenation|X|X
-Function  |X     |X     |X     |X    |X     |X     |X       |X
-Coroutine |X     |X     |X     |X    |X     |X     |X       |X
+left/right|None  |Bool  |Int   |Float|String|List  |Function
+----------|------|------|------|-----|------|------|--------
+None      |X     |X     |X     |X    |X     |X     |X        
+Bool      |X     |boolean OR|X |X    |X     |X     |X       
+Int       |X     |X     |addition|X  |X     |X     |X       
+Float     |X     |X     |X     |addition|X  |X     |X       
+String    |X     |X     |X     |X    |concatenation|X|X     
+List      |X     |X     |X     |X    |X     |concatenation|X
+Function  |X     |X     |X     |X    |X     |X     |X       
 
 #### Operator ```-```
-left/right|None  |Bool  |Int   |Float|String|List  |Function|Coroutine
-----------|------|------|------|-----|------|------|--------|---------
-None      |X     |X     |X     |X    |X     |X     |X       |X 
-Bool      |X     |X     |X     |X    |X     |X     |X       |X
-Int       |X     |X     |substraction|X|X   |X     |X       |X
-Float     |X     |X     |X     |substraction|X|X   |X       |X
-String    |X     |X     |X     |X    |X     |X     |X       |X
-List      |X     |X     |X     |X    |X     |remove items from left that are present in right|X|X
-Function  |X     |X     |X     |X    |X     |X     |X       |X
-Coroutine |X     |X     |X     |X    |X     |X     |X       |X
+left/right|None  |Bool  |Int   |Float|String|List  |Function
+----------|------|------|------|-----|------|------|--------
+None      |X     |X     |X     |X    |X     |X     |X        
+Bool      |X     |X     |X     |X    |X     |X     |X       
+Int       |X     |X     |substraction|X|X   |X     |X       
+Float     |X     |X     |X     |substraction|X|X   |X       
+String    |X     |X     |X     |X    |X     |X     |X       
+List      |X     |X     |X     |X    |X     |remove items from left that are present in right|X
+Function  |X     |X     |X     |X    |X     |X     |X       
 
 #### Operator ```*```
-left/right|None  |Bool  |Int   |Float|String|List  |Function|Coroutine
-----------|------|------|------|-----|------|------|--------|---------
-None      |X     |X     |X     |X    |X     |X     |X       |X 
-Bool      |X     |boolean AND|X|X    |X     |X     |X       |X
-Int       |X     |X     |multiplication|X|X |X     |X       |X
-Float     |X     |X     |X     |multiplication|X|X |X       |X
-String    |X     |X     |repeats string content n times|X|X|X|X|X
-List      |X     |X     |repeats list content n times|X|X|X|X|X
-Function  |X     |X     |X     |X    |X     |X     |X       |X
-Coroutine |X     |X     |X     |X    |X     |X     |X       |X
+left/right|None  |Bool  |Int   |Float|String|List  |Function
+----------|------|------|------|-----|------|------|--------
+None      |X     |X     |X     |X    |X     |X     |X        
+Bool      |X     |boolean AND|X|X    |X     |X     |X       
+Int       |X     |X     |multiplication|X|X |X     |X       
+Float     |X     |X     |X     |multiplication|X|X |X       
+String    |X     |X     |repeats string content n times|X|X|X|X
+List      |X     |X     |repeats list content n times|X|X|X|X
+Function  |X     |X     |X     |X    |X     |X     |X       
 
 #### Operator ```/```
-left/right|None  |Bool  |Int   |Float|String|List  |Function|Coroutine
-----------|------|------|------|-----|------|------|--------|---------
-None      |X     |X     |X     |X    |X     |X     |X       |X 
-Bool      |X     |X     |X     |X    |X     |X     |X       |X
-Int       |X     |X     |floor division|X|X |X     |X       |X
-Float     |X     |X     |X     |division|X  |X     |X       |X
-String    |X     |X     |X     |X    |X     |X     |X       |X
-List      |X     |X     |X     |X    |X     |X     |X       |X
-Function  |X     |X     |X     |X    |X     |X     |X       |X
-Coroutine |X     |X     |X     |X    |X     |X     |X       |X
+left/right|None  |Bool  |Int   |Float|String|List  |Function
+----------|------|------|------|-----|------|------|--------
+None      |X     |X     |X     |X    |X     |X     |X        
+Bool      |X     |X     |X     |X    |X     |X     |X       
+Int       |X     |X     |floor division|X|X |X     |X       
+Float     |X     |X     |X     |division|X  |X     |X       
+String    |X     |X     |X     |X    |X     |X     |X       
+List      |X     |X     |X     |X    |X     |X     |X       
+Function  |X     |X     |X     |X    |X     |X     |X       
 
 #### Operator ```%```
-left/right|None  |Bool  |Int   |Float|String|List  |Function|Coroutine
-----------|------|------|------|-----|------|------|--------|---------
-None      |X     |X     |X     |X    |X     |X     |X       |X 
-Bool      |X     |X     |X     |X    |X     |X     |X       |X
-Int       |X     |X     |modulo|X    |X     |X     |X       |X
-Float     |X     |X     |X     |modulo|X    |X     |X       |X
-String    |X     |X     |X     |X    |X     |X     |X       |X
-List      |X     |X     |X     |X    |X     |X     |X       |X
-Function  |X     |X     |X     |X    |X     |X     |X       |X
-Coroutine |X     |X     |X     |X    |X     |X     |X       |X
+left/right|None  |Bool  |Int   |Float|String|List  |Function
+----------|------|------|------|-----|------|------|--------
+None      |X     |X     |X     |X    |X     |X     |X        
+Bool      |X     |X     |X     |X    |X     |X     |X       
+Int       |X     |X     |modulo|X    |X     |X     |X       
+Float     |X     |X     |X     |modulo|X    |X     |X       
+String    |X     |X     |X     |X    |X     |X     |X       
+List      |X     |X     |X     |X    |X     |X     |X       
+Function  |X     |X     |X     |X    |X     |X     |X       
 
 #### Operator ```==```
 Tests the strict equality between two objects (objects must have the same type and same values to be equal).
@@ -147,16 +130,18 @@ Tests the strict equality between two objects (objects must have the same type a
 Tests the inequality between two objects.
 
 #### Operator ```<```
-left/right|None  |Bool  |Int   |Float|String|List  |Function|Coroutine
-----------|------|------|------|-----|------|------|--------|---------
-None      |X     |X     |X     |X    |X     |X     |X       |X 
-Bool      |X     |X     |X     |X    |X     |X     |X       |X
-Int       |X     |X     |<     |<    |X     |X     |X       |X
-Float     |X     |X     |<     |<    |X     |X     |X       |X
-String    |X     |X     |X     |X    |X     |X     |X       |X
-List      |X     |X     |X     |X    |X     |X     |X       |X
-Function  |X     |X     |X     |X    |X     |X     |X       |X
-Coroutine |X     |X     |X     |X    |X     |X     |X       |X
+
+remove the last column from the following table
+
+left/right|None  |Bool  |Int   |Float|String|List  |Function
+----------|------|------|------|-----|------|------|--------
+None      |X     |X     |X     |X    |X     |X     |X        
+Bool      |X     |X     |X     |X    |X     |X     |X       
+Int       |X     |X     |<     |<    |X     |X     |X       
+Float     |X     |X     |<     |<    |X     |X     |X       
+String    |X     |X     |X     |X    |X     |X     |X       
+List      |X     |X     |X     |X    |X     |X     |X       
+Function  |X     |X     |X     |X    |X     |X     |X  
 
 #### Operator ```>```
 Same behaviour as ```<```
@@ -180,4 +165,3 @@ Float     |X
 String    |X
 List      |X
 Function  |X
-Coroutine |X

@@ -1,6 +1,5 @@
 type eval_context = {
   mutable variables : (string, eval_obj) Hashtbl.t;
-  mutable types : (string, FStypes.type_obj) Hashtbl.t;
 }
 and eval_obj =
     Eval_None
@@ -11,8 +10,6 @@ and eval_obj =
   | Eval_Bool of bool
   | Eval_List of eval_obj list
   | Eval_Function of string list * eval_obj list * FSsyntax.stat
-  | Eval_Coroutine of string list * eval_obj list * FSsyntax.stat list ref *
-      eval_context
   | Eval_OCaml_Function of eval_obj list *
       (eval_context -> eval_obj list -> eval_obj) * FStypes.type_obj list *
       FStypes.type_obj
