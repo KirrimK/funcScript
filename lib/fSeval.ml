@@ -35,7 +35,6 @@ and eval_expr = fun context expr ->
     | None -> failwith (Printf.sprintf "Error while evaluating [%s]: variable '%s' not found" (expr_str expr) id)
 
 and destructure_assign = fun context varls expr_vl_ls->
-  (*Printf.printf "DESCTRUCTURING\n\\%s\n\\%s\n" (String.concat ", " (List.map expr_str varls)) (String.concat ", " (List.map eval_obj_str expr_vl_ls));*)
   let rec assign_values = fun vars values ->
     match vars, values with
     | [], [] -> ()
@@ -70,8 +69,9 @@ and syntax_lit_to_obj = fun context l ->
   | LITERAL_STRING s -> Eval_String s
   | LITERAL_LIST l -> Eval_List (List.map (eval_expr context) l)
   | LITERAL_FUNCTION (argnames, stf) ->
-    let (tpins, tpout) = type_function context argnames stf in
-    Eval_Function (argnames, [], stf, tpins, tpout)
+    begin match type_function (convert_context_to_type_context context) argnames stf(*type_function context argnames stf*) with
+    | Function_t(tpins, tpout) -> Eval_Function (argnames, [], stf, tpins, tpout)
+    | _ -> failwith "type_function did not return a function object" end
   | LITERAL_NONE -> Eval_None
 
 and unary_op = fun uo vl ->
@@ -139,17 +139,21 @@ and functioncall = fun context ef eal ->
       Eval_Function (argnames, tot_args, stf, tpins, tpout)
     else if List.length tot_args > List.length argnames then
       failwith "too much arguments in function call"
-    else
+    else if (type_check_args tot_args tpins) then
       let new_context = copy_context context in
       let () = List.iter2 (fun id vl -> Hashtbl.add new_context.variables id vl) argnames tot_args in
       let (_, res) = eval_stat new_context stf in res
+    else
+      failwith "type error in function call"
   | Eval_OCaml_Function (preargs, func, tpins, tpout) ->
     let tot_args = List.append preargs vl_ls in
-    if List.length tot_args < List.length tpins then
+    if List.length tot_args < List.length tpins && (type_check_args tot_args tpins) then
       Eval_OCaml_Function (tot_args, func, tpins, tpout)
     else if List.length tot_args > List.length tpins then
       failwith "too much arguments in function call"
-    else
+    else if (type_check_args tot_args tpins) then
       let new_context = copy_context context in
       func new_context tot_args
+    else
+      failwith "type error in function call"
   | _ -> failwith "tried to call a non-callable"

@@ -131,14 +131,12 @@ Tests the inequality between two objects.
 
 #### Operator ```<```
 
-remove the last column from the following table
-
 left/right|None  |Bool  |Int   |Float|String|List  |Function
 ----------|------|------|------|-----|------|------|--------
 None      |X     |X     |X     |X    |X     |X     |X        
 Bool      |X     |X     |X     |X    |X     |X     |X       
-Int       |X     |X     |<     |<    |X     |X     |X       
-Float     |X     |X     |<     |<    |X     |X     |X       
+Int       |X     |X     |<     |X    |X     |X     |X       
+Float     |X     |X     |X     |<    |X     |X     |X       
 String    |X     |X     |X     |X    |X     |X     |X       
 List      |X     |X     |X     |X    |X     |X     |X       
 Function  |X     |X     |X     |X    |X     |X     |X  

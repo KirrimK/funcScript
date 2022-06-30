@@ -14,9 +14,13 @@ let syntax_to_string = stat_str
 
 let new_std_context = fun () -> copy_context std_context
 
+let context_to_type_context = convert_context_to_type_context
+
 let copy_context = copy_context
 
-let eval_syntax = eval_stat 
+let eval_syntax = eval_stat
+
+let type_check_syntax = type_stat
 
 let obj_to_string = eval_obj_str
 

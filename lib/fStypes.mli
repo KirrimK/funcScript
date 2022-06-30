@@ -8,5 +8,5 @@ type type_obj =
   | Bool_t
   | List_t of type_obj
   | Function_t of type_obj list * type_obj
-  | Unclear_t of (type_obj, int) result
+  | Unclear_t of int
 val type_obj_str : type_obj -> string

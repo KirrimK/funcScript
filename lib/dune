@@ -4,3 +4,7 @@
 
 (menhir (modules fSparser))
 (ocamllex fSlexer)
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))

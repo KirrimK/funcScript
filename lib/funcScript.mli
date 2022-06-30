@@ -8,3 +8,5 @@ val eval_syntax :
 val obj_to_string : FSobjs.eval_obj -> string
 val type_of_obj : FSobjs.eval_obj -> FStypes.type_obj
 val type_to_string : FStypes.type_obj -> string
+val type_check_syntax : FStyping.type_context -> FSsyntax.stat -> FStypes.type_obj
+val context_to_type_context : FSobjs.eval_context -> FStyping.type_context
