@@ -1,4 +1,3 @@
-val unclear_id : int ref
 val next_unclear_id : unit -> int
 type type_obj =
     Any_t
