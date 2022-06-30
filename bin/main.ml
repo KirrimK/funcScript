@@ -27,12 +27,6 @@ let () =
         () 
     done;
     (*Printf.printf "%s\n" (syntax_to_string synt);*)
-    begin
-      try
-        Printf.printf "type check: %s\n" (type_to_string (type_check_syntax (context_to_type_context !ctx) (! synt)))
-      with Failure f ->
-        Printf.printf "Type check error: %s\n" (f)
-    end;
     try
       let (new_ctx, vl) = eval_syntax !ctx !synt in
       ctx := new_ctx;
