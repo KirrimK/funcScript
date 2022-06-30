@@ -12,7 +12,7 @@
 
 (maintainers "Rémy B")
 
-(license LICENSE)
+(license MIT)
 
 (documentation https://url/to/documentation)
 

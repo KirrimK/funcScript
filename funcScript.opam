@@ -4,7 +4,7 @@ synopsis: "A simplistic embeddable purely functionnal scripting language"
 description: "A longer description"
 maintainer: ["Rémy B"]
 authors: ["Rémy B"]
-license: "LICENSE"
+license: "MIT"
 tags: ["functional" "scripting" "embedded" "language"]
 homepage: "https://github.com/KirrimK/funcScript"
 doc: "https://url/to/documentation"
