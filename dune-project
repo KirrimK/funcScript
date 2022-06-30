@@ -1,4 +1,4 @@
-(lang dune 3.3)
+(lang dune 2.9)
 (using menhir 2.1)
 
 (name funcScript)

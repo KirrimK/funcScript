@@ -11,7 +11,7 @@ doc: "https://url/to/documentation"
 bug-reports: "https://github.com/KirrimK/funcScript/issues"
 depends: [
   "ocaml"
-  "dune" {>= "3.3"}
+  "dune" {>= "2.9"}
   "menhir" {>= "2.1"}
   "odoc" {with-doc}
 ]
@@ -24,9 +24,11 @@ build: [
     name
     "-j"
     jobs
+    "--promote-install-files=false"
     "@install"
     "@runtest" {with-test}
     "@doc" {with-doc}
   ]
+  ["dune" "install" "-p" name "--create-install-files" name]
 ]
 dev-repo: "git+https://github.com/KirrimK/funcScript.git"
