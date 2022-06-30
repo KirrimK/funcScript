@@ -4,6 +4,8 @@ open FStypes;;
 open FSobjs;;
 open FSsyntax;;
 
+(* TODO: ascendant type-checking not working, lists not verified for same types in all elements, recursive functions not working *)
+
 let rec first_elements_of_list = fun ls n ->
   match ls with
   | [] -> []
@@ -265,7 +267,8 @@ and type_desc_literal = fun tcontext l ->
 
 and type_function = fun tcontext argnames stf ->
   let loc_ctx = copy_tcontext tcontext in
-  List.iter (fun x -> Hashtbl.add (loc_ctx.type_variables) x (Unclear_t (next_unclear_id()))) argnames;
+  let arg_temp_types = List.map (fun _ -> (Unclear_t (next_unclear_id()))) argnames in
+  List.iter2 (fun x nm-> Hashtbl.add (loc_ctx.type_variables) nm x) arg_temp_types argnames;
   let tpout = type_stat loc_ctx stf in
   Function_t(List.map (fun x -> Hashtbl.find (loc_ctx.type_variables) x) argnames, tpout)
 
