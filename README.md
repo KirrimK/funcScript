@@ -16,6 +16,8 @@ A simplistic embeddable purely functional scripting language
 All objects are first-class.
 The type of an object can be checked at runtime with the ```type``` function.
 
+Note: the typing system is still a work in progress at this point.
+
 ### Syntax
 
 #### Assigning a value to a variable
@@ -27,7 +29,9 @@ Multiple assignments require having the same number of variables and values.
 
 Individual elements can also be acquired by destructuring lists:
 ```
-[<var_name>, <var_name>, ...] = <something_evaluating_to_a_list> in
+[<var_name>, <var_name>, ...] = <something_evaluating_to_a_list> in (array-style)
+or
+<var_name>::<var_name>, ... = <something_evaluating_to_a_list>, ... in (list-style)
 ...
 ```
 If there are more variables extracted than there are elements in the list, the excess variables will be assigned the value None.
@@ -122,6 +126,13 @@ Float     |X     |X     |X     |modulo|X    |X     |X
 String    |X     |X     |X     |X    |X     |X     |X       
 List      |X     |X     |X     |X    |X     |X     |X       
 Function  |X     |X     |X     |X    |X     |X     |X       
+
+#### Operator ```::```
+
+Used to add an element to the beginning of a list.
+Accepted parameters:
+    - left: element of type 'a
+    - right: list containing elements of type 'a
 
 #### Operator ```==```
 Tests the strict equality between two objects (objects must have the same type and same values to be equal).

@@ -3,7 +3,7 @@
 open Test_utils;;
 open FuncScript;;
 
-let generic_parse_test = generic_test parse_syntax;;
+let generic_parse_test = generic_test (fun () -> parse_syntax);;
 
 let test_stat_noop = generic_parse_test
   "stat_noop" "" STAT_NOOP
