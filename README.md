@@ -2,6 +2,35 @@
 
 A simplistic embeddable purely functional scripting language
 
+## Installation/Building
+
+To install/build this, you will need OCaml version 4.12 or later, as well as opam, with the packages menhir and dune installed.
+
+### Installing as an opam package
+
+(Note: no releases have been made yet, for now, build from source)
+
+First, add the repo to opam with the following command:
+
+```
+opam repo add KirrimK https://github.com/KirrimK/opam-repo.git
+opam update
+```
+
+Then, install the package with the following command:
+
+```
+opam install funcScript
+```
+
+
+### Building from source
+
+Clone this repo, and in the project root, run ```dune build```. This build the library, the executable (a REPL you can use to test the language), and the tests.
+Then run ```dune exec fSrepl``` to run the REPL, or ```dune runtest``` to run the unittests.
+
+To install this as a dev opam package, and be able to import this in your own OCaml projects, run ```opam install .```
+
 ## Language
 
 ### Values
