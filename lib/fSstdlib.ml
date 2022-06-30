@@ -1,6 +1,6 @@
 (* FSstdlib.ml *)
 
-open FSeval;;
+open FSobjs;;
 open FStypes;;
 open FStyping;;
 

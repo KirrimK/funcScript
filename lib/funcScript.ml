@@ -4,6 +4,7 @@ open FSeval;;
 open FSstdlib;;
 open FStyping;;
 open FStypes;;
+open FSobjs;;
 
 let parse_syntax = fun st ->
   let lexbuf = Lexing.from_string (String.concat "" [st; "\000"]) in

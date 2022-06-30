@@ -2,38 +2,8 @@
 
 open FSsyntax;;
 open FStypes;;
-
-type eval_context = {
-  mutable variables: (string, eval_obj) Hashtbl.t
-}
-
-and eval_obj =
-  | Eval_None
-  | Eval_None_Toplevel
-  | Eval_Int of int
-  | Eval_Float of float
-  | Eval_String of string
-  | Eval_Bool of bool
-  | Eval_List of eval_obj list
-  | Eval_Function of string list * eval_obj list * stat
-  | Eval_OCaml_Function of eval_obj list * (eval_context -> eval_obj list -> eval_obj) * (*typing*) type_obj list * type_obj
-
-let rec eval_obj_str = fun obj ->
-  match obj with
-  | Eval_None -> "None"
-  | Eval_None_Toplevel -> "None_Toplevel"
-  | Eval_Int i -> Printf.sprintf "%d" i
-  | Eval_Float f -> Printf.sprintf "%f" f
-  | Eval_Bool b -> Printf.sprintf "%b" b
-  | Eval_String s -> Printf.sprintf "\"%s\""s
-  | Eval_List l -> Printf.sprintf "[%s]" (String.concat ", " (List.map eval_obj_str l))
-  | Eval_Function(_, _, _) -> "Function"
-  | Eval_OCaml_Function(_, _, tpins, tpout) -> Printf.sprintf "(OCaml %s)" (type_obj_str (Function_t (tpins, tpout)))
-
-let copy_context = fun context ->
-  {
-    variables = Hashtbl.copy (context.variables);
-  }
+open FSobjs;;
+open FStyping;;
 
 let rec eval_stat = fun context stat ->
   match stat with
@@ -99,7 +69,9 @@ and syntax_lit_to_obj = fun context l ->
   | LITERAL_BOOL b -> Eval_Bool b
   | LITERAL_STRING s -> Eval_String s
   | LITERAL_LIST l -> Eval_List (List.map (eval_expr context) l)
-  | LITERAL_FUNCTION (argnames, stf) -> Eval_Function (argnames,[], stf)
+  | LITERAL_FUNCTION (argnames, stf) ->
+    let (tpins, tpout) = type_function context argnames stf in
+    Eval_Function (argnames, [], stf, tpins, tpout)
   | LITERAL_NONE -> Eval_None
 
 and unary_op = fun uo vl ->
@@ -161,10 +133,10 @@ and functioncall = fun context ef eal ->
   let evl = eval_expr context ef in
   let vl_ls = List.map (eval_expr context) eal in
   match evl with
-  | Eval_Function (argnames, preargs, stf) ->
+  | Eval_Function (argnames, preargs, stf, tpins, tpout) ->
     let tot_args = List.append preargs vl_ls in
-    if List.length tot_args < List.length argnames then
-      Eval_Function (argnames, tot_args, stf)
+    if List.length tot_args < List.length argnames && (type_check_args tot_args tpins) then
+      Eval_Function (argnames, tot_args, stf, tpins, tpout)
     else if List.length tot_args > List.length argnames then
       failwith "too much arguments in function call"
     else
