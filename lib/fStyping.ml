@@ -4,7 +4,7 @@ open FStypes;;
 open FSobjs;;
 open FSsyntax;;
 
-(* TODO: ascendant type-checking buggy (a, b, c -> a(b(c))) not giving expected type, lists not verified for same types in all elements, recursive functions not working *)
+(* TODO: recursive functions not working *)
 
 let rec first_elements_of_list = fun ls n ->
   match ls with

@@ -6,7 +6,10 @@ open FuncScript;;
   with _ -> acc;;*)
 
 let () =
-  Printf.printf "(funcScript repl v0.01 by Rémy B.)\n";
+  Printf.printf "(funcScript repl version %s by Rémy B.)\n"
+    (match Build_info.V1.version() with
+      None -> "unknown"
+    | Some v -> Build_info.V1.Version.to_string v);
   let ctx = ref (new_std_context ()) in
   let is_done = ref false in
   while not !is_done do
@@ -28,10 +31,11 @@ let () =
     done;
     (*Printf.printf "%s\n" (syntax_to_string synt);*)
     try
+      let (type_eval) = type_check_syntax (context_to_type_context !ctx) !synt in 
       let (new_ctx, vl) = eval_syntax !ctx !synt in
       ctx := new_ctx;
       if vl <> Eval_None_Toplevel then
-        Printf.printf "%s\t:%s\n" (type_to_string (type_of_obj vl)) (obj_to_string vl);
+        Printf.printf "%s\t:%s\n" (type_to_string (type_eval)) (obj_to_string vl);
     with Failure f ->
       Printf.printf "%s\n" (f)
   done

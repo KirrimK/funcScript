@@ -1,4 +1,4 @@
 (executable
  (public_name fSrepl)
  (name main)
- (libraries funcScript))
+ (libraries funcScript dune-build-info))

@@ -32,7 +32,7 @@ and eval_expr = fun context expr ->
   | EXPR_FCALL (ef, eal) -> functioncall context ef eal
   | EXPR_IDENTIFIER id -> match Hashtbl.find_opt context.variables id with
     | Some v -> v
-    | None -> failwith (Printf.sprintf "Error while evaluating [%s]: variable '%s' not found" (expr_str expr) id)
+    | None -> failwith (Printf.sprintf "(Eval) variable \"%s\" not found, did type-check get bypassed?"  id)
 
 and destructure_assign = fun context varls expr_vl_ls->
   let rec assign_values = fun vars values ->
@@ -50,7 +50,8 @@ and destructure_assign = fun context varls expr_vl_ls->
       assign_values tlv tle;
     | (EXPR_LITERAL(LITERAL_NONE))::tlv, _::tle -> assign_values tlv tle
     | (EXPR_LITERAL(LITERAL_LIST l))::tlv, (Eval_List el)::tle -> destructure_assign context l el; assign_values tlv tle
-    | _, _ -> failwith "assignment unsupported" in
+    | a::_, b::_ -> failwith (Printf.sprintf "(Eval) couldn't assign value (%s) to expression (%s)" (eval_obj_str b) (expr_str a))
+    | _, _ -> failwith "(Eval) error while assigning values" in 
   assign_values varls expr_vl_ls
 
 and is_truthy = fun obj ->
@@ -71,7 +72,7 @@ and syntax_lit_to_obj = fun context l ->
   | LITERAL_FUNCTION (argnames, stf) ->
     begin match type_function (convert_context_to_type_context context) argnames stf(*type_function context argnames stf*) with
     | Function_t(tpins, tpout) -> Eval_Function (argnames, [], stf, tpins, tpout)
-    | _ -> failwith "type_function did not return a function object" end
+    | a -> failwith (Printf.sprintf "(Eval) type_function returned a (%s) instead of function" (type_obj_str a)) end
   | LITERAL_NONE -> Eval_None
 
 and unary_op = fun uo vl ->
@@ -79,7 +80,7 @@ and unary_op = fun uo vl ->
   | Not, Eval_Bool b -> Eval_Bool (not b)
   | Uminus, Eval_Int i -> Eval_Int (-i)
   | Uminus, Eval_Float f -> Eval_Float (-.f)
-  | _, _ -> failwith "unsupported"
+  | a, b -> failwith (Printf.sprintf "(Eval) unsupported operation (%s %s), did type-check get bypassed?" (unop_str a) (eval_obj_str b))
 
 and binary_op = fun bo el er ->
   match bo, el, er with
@@ -127,7 +128,7 @@ and binary_op = fun bo el er ->
   | Let, Eval_Float fl, Eval_Float fr -> Eval_Bool((compare fl fr)<1||(compare fl fr)=0)
   | Get, Eval_Float fl, Eval_Float fr -> Eval_Bool((compare fl fr)>1||(compare fl fr)=0)
   | Head, a, Eval_List lsrt when a <> Eval_None -> Eval_List(a::lsrt)
-  | _, _, _ -> failwith "unsupported"
+  | a, b, c -> failwith (Printf.sprintf "(Eval) unsupported operation (%s %s %s), did type-check get bypassed?" (eval_obj_str b) (binop_str a) (eval_obj_str c))
 
 and functioncall = fun context ef eal ->
   let evl = eval_expr context ef in
@@ -137,23 +138,17 @@ and functioncall = fun context ef eal ->
     let tot_args = List.append preargs vl_ls in
     if List.length tot_args < List.length argnames && (type_check_args tot_args tpins) then
       Eval_Function (argnames, tot_args, stf, tpins, tpout)
-    else if List.length tot_args > List.length argnames then
-      failwith "too much arguments in function call"
-    else if (type_check_args tot_args tpins) then
+    else
+      (* should have type-checked *)
       let new_context = copy_context context in
       let () = List.iter2 (fun id vl -> Hashtbl.add new_context.variables id vl) argnames tot_args in
       let (_, res) = eval_stat new_context stf in res
-    else
-      failwith "type error in function call"
   | Eval_OCaml_Function (preargs, func, tpins, tpout) ->
     let tot_args = List.append preargs vl_ls in
     if List.length tot_args < List.length tpins && (type_check_args tot_args tpins) then
       Eval_OCaml_Function (tot_args, func, tpins, tpout)
-    else if List.length tot_args > List.length tpins then
-      failwith "too much arguments in function call"
-    else if (type_check_args tot_args tpins) then
+    else
+      (* should have type-checked *)
       let new_context = copy_context context in
       func new_context tot_args
-    else
-      failwith "type error in function call"
   | _ -> failwith "tried to call a non-callable"
