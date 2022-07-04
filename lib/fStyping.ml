@@ -271,7 +271,7 @@ and type_asc_expr = fun tcontext e t ->
       Hashtbl.iter (fun i vl -> if vl = Unclear_t n then Hashtbl.add tcontext.type_variables i t else ()) tcontext.type_variables;
       t
     | a when is_unclear_list t && is_unclear_list a -> t
-    | a when is_unclear_list a -> a
+    | a when is_unclear_list a || is_unclear_list t -> a
     | a -> failwith (Printf.sprintf "(Typing) literal was inferred type (%s) but has type (%s)" (type_obj_str t) (type_obj_str a)) end
   | EXPR_UNARY (uo, e) -> let te = type_asc_unop uo t in
     if te = t then let _ = type_asc_expr tcontext e te in te else failwith (Printf.sprintf "(Typing) unary operation output (%s) was inferred type (%s) but has type (%s)" (unop_str uo) (type_obj_str t) (type_obj_str te))
@@ -283,7 +283,7 @@ and type_asc_expr = fun tcontext e t ->
     let tf = type_desc_expr tcontext ef in
     begin match tf with
     | Function_t (tpins, tpout) ->
-      if tpout = t then
+      if tpout = t || is_unclear_list tpout then
         let _ = List.map2 (fun x y -> type_asc_expr tcontext x y) eal tpins in
         tpout
       else failwith (Printf.sprintf "(Typing) function was inferred output type (%s) but got (%s)" (type_obj_str t) (type_obj_str tpout))
