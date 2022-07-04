@@ -27,3 +27,7 @@ let obj_to_string = eval_obj_str
 let type_of_obj = get_type_of_obj
 
 let type_to_string = type_obj_str
+
+let reset_unclear_ids = FStypes.reset_unclear_id;;
+
+let set_typing_debug = fun b -> FStyping.debug_typing := b;;

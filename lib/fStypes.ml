@@ -2,6 +2,9 @@
 
 let unclear_id = ref 0;;
 
+let reset_unclear_id = fun () ->
+  unclear_id := 0;;
+
 let next_unclear_id = fun () ->
   let id = !unclear_id in
   unclear_id := !unclear_id + 1;

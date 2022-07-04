@@ -1,4 +1,5 @@
 val next_unclear_id : unit -> int
+val reset_unclear_id : unit -> unit
 type type_obj =
     Any_t
   | None_t
