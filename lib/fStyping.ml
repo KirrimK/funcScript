@@ -4,7 +4,7 @@ open FStypes;;
 open FSobjs;;
 open FSsyntax;;
 
-(* TODO: ascendant type-checking not working, lists not verified for same types in all elements, recursive functions not working *)
+(* TODO: ascendant type-checking buggy (a, b, c -> a(b(c))) not giving expected type, lists not verified for same types in all elements, recursive functions not working *)
 
 let rec first_elements_of_list = fun ls n ->
   match ls with
@@ -250,7 +250,12 @@ and type_asc_expr = fun tcontext e t ->
   match e with
   | EXPR_LITERAL l ->
     let te = type_desc_literal tcontext l in
-    if te = t then te else failwith "Error: literal has wrong type"
+    begin match te with
+    | a when a = t -> a
+    | Unclear_t n ->
+      Hashtbl.iter (fun i vl -> if vl = Unclear_t n then Hashtbl.add tcontext.type_variables i t else ()) tcontext.type_variables;
+      t
+    | _ -> failwith "Error: literal has wrong type" end
   | EXPR_UNARY (uo, e) -> let te = type_asc_unop uo t in
     if te = t then let _ = type_asc_expr tcontext e te in te else failwith "Error: unary operation has wrong type"
   | EXPR_BINARY (bo, e1, e2) -> let (t1, t2) = type_asc_binop bo t in
