@@ -58,6 +58,18 @@ let type_check_args = fun tot_args tpins ->
         false in
   local tot_args tpins
 
+
+let rec is_unclear_list = fun tl ->
+  match tl with
+  | List_t (t) -> is_unclear_list t
+  | Unclear_t _ -> true
+  | _ -> false
+
+let is_list = fun tl ->
+  match tl with
+  | List_t _ -> true
+  | _ -> false
+
 let type_desc_unop = fun op t ->
   match op,t with
   | Not, Bool_t -> Bool_t
@@ -65,7 +77,7 @@ let type_desc_unop = fun op t ->
   | Uminus, Int_t -> Int_t
   | Uminus, Float_t -> Float_t
   | Uminus, Unclear_t i -> Unclear_t i
-  | _, _ -> failwith "Error in unary operation (desc)"
+  | a, b -> failwith (Printf.sprintf "(Typing) unary operator (%s) used with argument of incorrect type (%s)" (unop_str a) (type_obj_str b))
 
 let type_asc_unop = fun op tr ->
   match op, tr with
@@ -74,7 +86,7 @@ let type_asc_unop = fun op tr ->
   | Uminus, Int_t -> Int_t
   | Uminus, Float_t -> Float_t
   | Uminus, Unclear_t i -> Unclear_t i
-  | _, _ -> failwith "Error in unary operation (asc)"
+  | a, b -> failwith (Printf.sprintf "(Typing) unary operator (%s) was inferred incorrect output of type (%s)" (unop_str a) (type_obj_str b))
 
 let type_desc_binop = fun op ta tb ->
   match op, ta, tb with
@@ -145,8 +157,9 @@ let type_desc_binop = fun op ta tb ->
   | (Lt|Let|Gt|Get), Float_t, Unclear_t _ -> Bool_t
 
   | Head, a, List_t t when a = t -> List_t t
+  | Head, a, List_t _ when is_unclear_list tb -> List_t a
 
-  | _, _, _ -> failwith "Error in binary operation (desc)"
+  | a, b, c -> failwith (Printf.sprintf "(Typing) binary operation (%s) used with arguments of incorrect types: (%s) and (%s)" (binop_str a) (type_obj_str b) (type_obj_str c))
 
 let type_asc_binop = fun op tr ->
   match op, tr with
@@ -184,12 +197,13 @@ let type_asc_binop = fun op tr ->
   | (Lt|Let|Gt|Get), Bool_t -> (Unclear_t (next_unclear_id()), Unclear_t (next_unclear_id()))
 
   | Head, List_t t -> (t, List_t t)
+  | Head, t when is_unclear_list t -> (t, List_t t)
 
-  | _, _ -> failwith "Error in binary operation (asc)"
+  | a, b -> failwith (Printf.sprintf "(Typing) binary operation (%s) was inferred incorrect output of type (%s)" (binop_str a) (type_obj_str b))
 
 let index_of e l = 
   let rec index_rec i = function
-    | [] -> failwith "notfound"
+    | [] -> failwith "index_of: not found"
     | hd::tl -> if hd = e then i else index_rec (i+1) tl
   in
   index_rec 0 l
@@ -198,20 +212,21 @@ let type_desc_fcall = fun ft atls ->
   match ft with
   | Function_t(tpins, tpout) ->
       let rec local = fun tpinsl atlsl ->
-        (*Printf.printf "type_desc_fcall:\n[%s] vs [%s]\n" (String.concat ", " (List.map type_obj_str tpinsl)) (String.concat ", " (List.map type_obj_str atlsl));*)
+        (*Printf.printf "type_desc_fcall local:\n[%s] vs [%s]\n" (String.concat ", " (List.map type_obj_str tpinsl)) (String.concat ", " (List.map type_obj_str atlsl));*)
         begin match tpinsl, atlsl with
           | [], [] -> begin match tpout with
                             | Unclear_t _ -> let pos = index_of tpout tpins in List.nth atls pos
                             | a -> a end
-          | _, [] -> Function_t(tpinsl, tpout)
+          | a, [] -> Function_t(a, tpout)
+          | [], _::_ -> failwith "(Typing) too many arguments in function call"
           | a::tla, b::tlb when a = b -> local tla tlb
           | Unclear_t _::tla, _::tlb -> local tla tlb
           | Any_t::tla, _::tlb -> local tla tlb
           | _::tla, Unclear_t _::tlb -> local tla tlb
-          | _, _ -> failwith "Error in function call (desc)" end in
+          | a::_, b::_ -> failwith (Printf.sprintf "(Typing) argument of incorrect type: required (%s) but got (%s)" (type_obj_str a) (type_obj_str b)) end in
       local tpins atls
   | Unclear_t _ -> Unclear_t (next_unclear_id())
-  | _ -> failwith "Trying to call a non-function"
+  | _ -> failwith (Printf.sprintf "(Typing) tried to call a non function (type of object is %s)" (type_obj_str ft))
 
 let rec type_desc_stat = fun tcontext st ->
   match st with
@@ -229,7 +244,7 @@ let rec type_desc_stat = fun tcontext st ->
     let _ = type_desc_expr tcontext e in
     begin match type_desc_stat (copy_tcontext tcontext) sti, type_desc_stat (copy_tcontext tcontext) ste with
           | a, b when a = b -> a
-          | _ -> failwith "Error: two if blocks do not have the same return type" end
+          | a, b -> failwith (Printf.sprintf "(Typing) blocks in IF/ELSE statement should have same return types, but got (%s) and (%s)" (type_obj_str a) (type_obj_str b)) end
   | STAT_DROPVALUE (e, stn) -> 
     let _ = type_desc_expr tcontext e in
     type_desc_stat tcontext stn
@@ -255,9 +270,11 @@ and type_asc_expr = fun tcontext e t ->
     | Unclear_t n ->
       Hashtbl.iter (fun i vl -> if vl = Unclear_t n then Hashtbl.add tcontext.type_variables i t else ()) tcontext.type_variables;
       t
-    | _ -> failwith "Error: literal has wrong type" end
+    | a when is_unclear_list t && is_unclear_list a -> t
+    | a when is_unclear_list a -> a
+    | a -> failwith (Printf.sprintf "(Typing) literal was inferred type (%s) but has type (%s)" (type_obj_str t) (type_obj_str a)) end
   | EXPR_UNARY (uo, e) -> let te = type_asc_unop uo t in
-    if te = t then let _ = type_asc_expr tcontext e te in te else failwith "Error: unary operation has wrong type"
+    if te = t then let _ = type_asc_expr tcontext e te in te else failwith (Printf.sprintf "(Typing) unary operation output (%s) was inferred type (%s) but has type (%s)" (unop_str uo) (type_obj_str t) (type_obj_str te))
   | EXPR_BINARY (bo, e1, e2) -> let (t1, t2) = type_asc_binop bo t in
     let _ = type_asc_expr tcontext e1 t1 in
     let _ = type_asc_expr tcontext e2 t2 in
@@ -268,12 +285,12 @@ and type_asc_expr = fun tcontext e t ->
     | Function_t (tpins, tpout) ->
       if tpout = t then
         let _ = List.map2 (fun x y -> type_asc_expr tcontext x y) eal tpins in
-        tf
-      else failwith "Error: function call has wrong type"
+        tpout
+      else failwith (Printf.sprintf "(Typing) function was inferred output type (%s) but got (%s)" (type_obj_str t) (type_obj_str tpout))
     | Unclear_t n -> let tfo = type_asc_expr tcontext ef (Function_t(List.map (fun x -> type_asc_expr tcontext x (type_desc_expr tcontext x)) eal, t)) in
       Hashtbl.iter (fun i vl -> if vl = Unclear_t n then Hashtbl.add tcontext.type_variables i tfo else ()) tcontext.type_variables;
-      tfo
-    | _ -> failwith "Error: function call has wrong type" end
+      t
+    | a -> failwith (Printf.sprintf "(Typing) function call was expecting something callable, but got (%s)" (type_obj_str a)) end
   | EXPR_IDENTIFIER i ->
     begin match Hashtbl.find_opt tcontext.type_variables i with
     | Some ti when t = ti -> ti
@@ -282,7 +299,8 @@ and type_asc_expr = fun tcontext e t ->
         if vl = (Unclear_t (n)) then
           Hashtbl.add tcontext.type_variables id t
         else ()) tcontext.type_variables; t
-    | _ -> failwith "Error: identifier has wrong type" end
+    | Some a -> failwith (Printf.sprintf "(Typing) variable was expected to have type (%s) but got (%s)" (type_obj_str t) (type_obj_str a))
+    | None -> failwith (Printf.sprintf "(Typing) variable was expected to have type (%s) but was not in context" (type_obj_str t)) end
 
 and type_desc_expr = fun tcontext e ->
   match e with
@@ -299,7 +317,7 @@ and type_desc_expr = fun tcontext e ->
       type_desc_fcall tf tls
   | EXPR_IDENTIFIER id -> begin match Hashtbl.find_opt tcontext.type_variables id with
                             | Some t -> t
-                            | None -> failwith "Error: Identifier not found" end
+                            | None -> failwith (Printf.sprintf "(Typing) Identifier \"%s\" not found" id) end
 
 and type_of_list = fun tcontext ls tacc ->
   begin match ls with
@@ -307,7 +325,8 @@ and type_of_list = fun tcontext ls tacc ->
   | hd::tl -> begin match type_desc_expr tcontext hd, tacc with
                     | t, b when t = b -> type_of_list tcontext tl t
                     | t, Unclear_t _ -> type_of_list tcontext tl t
-                    | _ -> failwith "Type error in list literal" end end 
+                    | t, b when is_unclear_list t -> type_of_list tcontext tl b
+                    | a, b -> failwith (Printf.sprintf "(Typing) element of type (%s) found in list of type (%s)" (type_obj_str a) (type_obj_str b)) end end 
 
 and type_desc_literal = fun tcontext l ->
   match l with
@@ -345,5 +364,6 @@ and type_assign = fun tcontext el elv ->
         assign_values tlv tle
     | (EXPR_LITERAL(LITERAL_NONE))::tlv, _::tle -> assign_values tlv tle
     | (EXPR_LITERAL(LITERAL_LIST l))::tlv, (List_t(a))::tle -> type_assign tcontext l (List.map (fun _ -> a) l); assign_values tlv tle
-    | _, _ -> failwith "Error in assignment type-checking" in
+    | a::_, b::_ -> failwith (Printf.sprintf "(Typing) couldn't assign value of type (%s) to expression (%s)" (type_obj_str b) (expr_str a))
+    | _, _ -> failwith "(Typing) error while checking assignment types" in
   assign_values el elv
