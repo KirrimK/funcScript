@@ -20,7 +20,7 @@ let copy_context = copy_context
 
 let eval_syntax = eval_stat
 
-let type_check_syntax = type_stat
+let type_check_syntax = type_desc_stat
 
 let obj_to_string = eval_obj_str
 

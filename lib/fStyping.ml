@@ -198,6 +198,7 @@ let type_desc_fcall = fun ft atls ->
   match ft with
   | Function_t(tpins, tpout) ->
       let rec local = fun tpinsl atlsl ->
+        (*Printf.printf "type_desc_fcall:\n[%s] vs [%s]\n" (String.concat ", " (List.map type_obj_str tpinsl)) (String.concat ", " (List.map type_obj_str atlsl));*)
         begin match tpinsl, atlsl with
           | [], [] -> begin match tpout with
                             | Unclear_t _ -> let pos = index_of tpout tpins in List.nth atls pos
@@ -206,28 +207,77 @@ let type_desc_fcall = fun ft atls ->
           | a::tla, b::tlb when a = b -> local tla tlb
           | Unclear_t _::tla, _::tlb -> local tla tlb
           | Any_t::tla, _::tlb -> local tla tlb
+          | _::tla, Unclear_t _::tlb -> local tla tlb
           | _, _ -> failwith "Error in function call (desc)" end in
       local tpins atls
+  | Unclear_t _ -> Unclear_t (next_unclear_id())
   | _ -> failwith "Trying to call a non-function"
 
-let rec type_stat = fun tcontext st ->
+let rec type_desc_stat = fun tcontext st ->
   match st with
   | STAT_NOOP -> None_t
-  | STAT_EXPR e -> type_desc_expr tcontext e
+  | STAT_EXPR e -> 
+    let res = type_desc_expr tcontext e in
+    let _ = type_asc_expr tcontext e res in res
   | STAT_ASSIGN (el, elv, stn) ->
     type_assign tcontext el (List.map (fun x -> type_desc_expr tcontext x) elv);
-    type_stat tcontext stn
+    type_desc_stat tcontext stn
   | STAT_ASSIGN_TOPLEVEL (el, elv) ->
     type_assign tcontext el (List.map (fun x -> type_desc_expr tcontext x) elv);
     None_t
   | STAT_IF (e, sti, ste) -> 
     let _ = type_desc_expr tcontext e in
-    begin match type_stat (copy_tcontext tcontext) sti, type_stat (copy_tcontext tcontext) ste with
+    begin match type_desc_stat (copy_tcontext tcontext) sti, type_desc_stat (copy_tcontext tcontext) ste with
           | a, b when a = b -> a
           | _ -> failwith "Error: two if blocks do not have the same return type" end
   | STAT_DROPVALUE (e, stn) -> 
     let _ = type_desc_expr tcontext e in
-    type_stat tcontext stn
+    type_desc_stat tcontext stn
+
+and type_asc_stat = fun tcontext st t ->
+  let _ = match st with
+  | STAT_NOOP -> None_t
+  | STAT_EXPR e -> type_asc_expr tcontext e t
+  | STAT_ASSIGN (_, _, _(*el, elv, _*)) -> None_t (*type_asc_assign tcontext el elv*)
+  | STAT_ASSIGN_TOPLEVEL (_, _(*el, elv*)) -> None_t (*type_asc_assign tcontext el elv*)
+  | STAT_IF (e, sti, ste) -> 
+    type_asc_stat (copy_tcontext tcontext) sti t;
+    type_asc_stat (copy_tcontext tcontext) ste t;
+    type_asc_expr tcontext e t
+  | STAT_DROPVALUE (e, _) -> type_asc_expr tcontext e t in ()
+
+and type_asc_expr = fun tcontext e t ->
+  match e with
+  | EXPR_LITERAL l ->
+    let te = type_desc_literal tcontext l in
+    if te = t then te else failwith "Error: literal has wrong type"
+  | EXPR_UNARY (uo, e) -> let te = type_asc_unop uo t in
+    if te = t then let _ = type_asc_expr tcontext e te in te else failwith "Error: unary operation has wrong type"
+  | EXPR_BINARY (bo, e1, e2) -> let (t1, t2) = type_asc_binop bo t in
+    let _ = type_asc_expr tcontext e1 t1 in
+    let _ = type_asc_expr tcontext e2 t2 in
+    t
+  | EXPR_FCALL (ef, eal) ->
+    let tf = type_desc_expr tcontext ef in
+    begin match tf with
+    | Function_t (tpins, tpout) ->
+      if tpout = t then
+        let _ = List.map2 (fun x y -> type_asc_expr tcontext x y) eal tpins in
+        tf
+      else failwith "Error: function call has wrong type"
+    | Unclear_t n -> let tfo = type_asc_expr tcontext ef (Function_t(List.map (fun x -> type_asc_expr tcontext x (type_desc_expr tcontext x)) eal, t)) in
+      Hashtbl.iter (fun i vl -> if vl = Unclear_t n then Hashtbl.add tcontext.type_variables i tfo else ()) tcontext.type_variables;
+      tfo
+    | _ -> failwith "Error: function call has wrong type" end
+  | EXPR_IDENTIFIER i ->
+    begin match Hashtbl.find_opt tcontext.type_variables i with
+    | Some ti when t = ti -> ti
+    | Some (Unclear_t n) ->
+      Hashtbl.iter (fun id vl ->
+        if vl = (Unclear_t (n)) then
+          Hashtbl.add tcontext.type_variables id t
+        else ()) tcontext.type_variables; t
+    | _ -> failwith "Error: identifier has wrong type" end
 
 and type_desc_expr = fun tcontext e ->
   match e with
@@ -269,8 +319,8 @@ and type_function = fun tcontext argnames stf ->
   let loc_ctx = copy_tcontext tcontext in
   let arg_temp_types = List.map (fun _ -> (Unclear_t (next_unclear_id()))) argnames in
   List.iter2 (fun x nm-> Hashtbl.add (loc_ctx.type_variables) nm x) arg_temp_types argnames;
-  let tpout = type_stat loc_ctx stf in
-  Function_t(List.map (fun x -> Hashtbl.find (loc_ctx.type_variables) x) argnames, tpout)
+  let tpout = type_desc_stat loc_ctx stf in
+  Function_t(List.map (fun x -> Hashtbl.find (loc_ctx.type_variables) x) (List.rev argnames), tpout)
 
 and type_assign = fun tcontext el elv ->
   let rec assign_values = fun vars values ->

@@ -28,4 +28,4 @@ let rec type_obj_str = fun tp ->
   | Bool_t -> "Bool_t"
   | String_t -> "String_t"
   | Function_t (tpins, tpout) -> Printf.sprintf "(%s -> %s)" (String.concat ", " (List.map type_obj_str tpins)) (type_obj_str tpout)
-  | Unclear_t i -> Printf.sprintf "(%d Unclear_t)" i
+  | Unclear_t i -> Printf.sprintf "u%dt" i
