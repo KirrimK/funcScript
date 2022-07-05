@@ -11,7 +11,7 @@ let debug_print_indent = ref 0;;
 
 let rec first_elements_of_list = fun ls n ->
   if !debug_typing then
-    Printf.printf "%sfirst_elements_of_list len(ls):%d n:%d\n" (String.make !debug_print_indent '\t') (List.length ls) n;
+    Printf.printf "%sfirst_elements_of_list len(ls):%d n:%d\n" (String.make !debug_print_indent ' ') (List.length ls) n;
   match ls with
   | [] -> []
   | hd::tl -> if n <= 1 then [hd]
@@ -19,7 +19,7 @@ let rec first_elements_of_list = fun ls n ->
 
 let last_elements_of_list = fun ls n ->
   if !debug_typing then
-    Printf.printf "%slast_elements_of_list len(ls):%d n:%d\n"  (String.make !debug_print_indent '\t') (List.length ls) n;
+    Printf.printf "%slast_elements_of_list len(ls):%d n:%d\n"  (String.make !debug_print_indent ' ') (List.length ls) n;
     incr debug_print_indent;
   let res = first_elements_of_list (List.rev ls) (List.length ls - n) in
   decr debug_print_indent;
@@ -36,7 +36,7 @@ let copy_tcontext = fun tctx ->
 
 let rec get_type_of_obj = fun obj ->
   if !debug_typing then
-    Printf.printf "%sget_type_of_obj obj:%s\n"  (String.make !debug_print_indent '\t') (eval_obj_str obj);
+    Printf.printf "%sget_type_of_obj obj:%s\n"  (String.make !debug_print_indent ' ') (eval_obj_str obj);
     incr debug_print_indent;
   match obj with
   | Eval_None
@@ -56,7 +56,7 @@ let rec get_type_of_obj = fun obj ->
 let convert_context_to_type_context = fun ctx ->
   let old_debug = !debug_typing in
   if old_debug then
-    Printf.printf "%sconvert_context_to_type_context\n" (String.make !debug_print_indent '\t');
+    Printf.printf "%sconvert_context_to_type_context\n" (String.make !debug_print_indent ' ');
     debug_typing := false;
   let tctx = {type_variables = Hashtbl.create (Hashtbl.length ctx.variables)} in
   Hashtbl.iter (fun id vl -> Hashtbl.add (tctx.type_variables) id (get_type_of_obj vl)) ctx.variables;
@@ -66,7 +66,7 @@ let convert_context_to_type_context = fun ctx ->
 let type_check_args = fun tot_args tpins ->
   if !debug_typing then
     Printf.printf "%stype_check_args tot_args:[%s] tpins:[%s]\n"
-    (String.make !debug_print_indent '\t')
+    (String.make !debug_print_indent ' ')
     (String.concat "; " (List.map eval_obj_str tot_args))
     (String.concat "; " (List.map type_obj_str tpins));
   let rec local = fun args ins ->
@@ -85,7 +85,7 @@ let type_check_args = fun tot_args tpins ->
 
 let rec is_unclear_list = fun tl ->
   if !debug_typing then
-    Printf.printf "%sis_unclear_list tl:%s\n"  (String.make !debug_print_indent '\t') (type_obj_str tl);
+    Printf.printf "%sis_unclear_list tl:%s\n"  (String.make !debug_print_indent ' ') (type_obj_str tl);
     incr debug_print_indent;
   match tl with
   | List_t (t) -> is_unclear_list t
@@ -94,14 +94,14 @@ let rec is_unclear_list = fun tl ->
 
 let is_list = fun tl ->
   if !debug_typing then
-    Printf.printf "%sis_list tl:%s\n"  (String.make !debug_print_indent '\t') (type_obj_str tl);
+    Printf.printf "%sis_list tl:%s\n"  (String.make !debug_print_indent ' ') (type_obj_str tl);
   match tl with
   | List_t _ -> true
   | _ -> false
 
 let type_desc_unop = fun op t ->
   if !debug_typing then
-    Printf.printf "%stype_desc_unop op:%s t:%s\n" (String.make !debug_print_indent '\t') (unop_str op) (type_obj_str t);
+    Printf.printf "%stype_desc_unop op:%s t:%s\n" (String.make !debug_print_indent ' ') (unop_str op) (type_obj_str t);
   match op,t with
   | Not, Bool_t -> Bool_t
   | Not, Unclear_t _ -> Bool_t
@@ -112,7 +112,7 @@ let type_desc_unop = fun op t ->
 
 let type_asc_unop = fun op tr ->
   if !debug_typing then
-    Printf.printf "%stype_asc_unop op:%s tr:%s\n"  (String.make !debug_print_indent '\t') (unop_str op) (type_obj_str tr);
+    Printf.printf "%stype_asc_unop op:%s tr:%s\n"  (String.make !debug_print_indent ' ') (unop_str op) (type_obj_str tr);
   match op, tr with
   | Not, Bool_t -> Bool_t
   | Not, Unclear_t _ -> Bool_t
@@ -123,7 +123,7 @@ let type_asc_unop = fun op tr ->
 
 let type_desc_binop = fun op ta tb ->
   if !debug_typing then
-    Printf.printf "%stype_desc_binop op:%s ta:%s tb:%s\n" (String.make !debug_print_indent '\t') (binop_str op) (type_obj_str ta) (type_obj_str tb);
+    Printf.printf "%stype_desc_binop op:%s ta:%s tb:%s\n" (String.make !debug_print_indent ' ') (binop_str op) (type_obj_str ta) (type_obj_str tb);
   match op, ta, tb with
   | Add, Int_t, Int_t -> Int_t
   | Add, Float_t, Float_t -> Float_t
@@ -198,7 +198,7 @@ let type_desc_binop = fun op ta tb ->
 
 let type_asc_binop = fun op tr ->
   if !debug_typing then
-    Printf.printf "%stype_asc_binop op:%s tr:%s\n" (String.make !debug_print_indent '\t') (binop_str op) (type_obj_str tr);
+    Printf.printf "%stype_asc_binop op:%s tr:%s\n" (String.make !debug_print_indent ' ') (binop_str op) (type_obj_str tr);
   match op, tr with
   | Add, Int_t -> (Int_t, Int_t)
   | Add, Float_t -> (Float_t, Float_t)
@@ -240,7 +240,7 @@ let type_asc_binop = fun op tr ->
 
 let index_of e l = 
   if !debug_typing then
-    Printf.printf "%sindex_of\n" (String.make !debug_print_indent '\t');
+    Printf.printf "%sindex_of\n" (String.make !debug_print_indent ' ');
   let rec index_rec i = function
     | [] -> failwith "index_of: not found"
     | hd::tl -> if hd = e then i else index_rec (i+1) tl
@@ -249,7 +249,7 @@ let index_of e l =
 
 let type_desc_fcall = fun ft atls ->
   if !debug_typing then
-    Printf.printf "%stype_desc_fcall ft:%s atls:%s\n" (String.make !debug_print_indent '\t') (type_obj_str ft) (String.concat "; " (List.map type_obj_str atls));
+    Printf.printf "%stype_desc_fcall ft:%s atls:%s\n" (String.make !debug_print_indent ' ') (type_obj_str ft) (String.concat "; " (List.map type_obj_str atls));
   match ft with
   | Function_t(tpins, tpout) ->
       let rec local = fun tpinsl atlsl ->
@@ -271,7 +271,7 @@ let type_desc_fcall = fun ft atls ->
 
 let rec type_desc_stat = fun tcontext st ->
   if !debug_typing then
-    Printf.printf "%stype_desc_stat st:%s\n" (String.make !debug_print_indent '\t') (stat_str st);
+    Printf.printf "%stype_desc_stat st:%s\n" (String.make !debug_print_indent ' ') (stat_str st);
     incr debug_print_indent;
   match st with
   | STAT_NOOP -> decr debug_print_indent; None_t
@@ -299,7 +299,7 @@ let rec type_desc_stat = fun tcontext st ->
 
 and type_asc_stat = fun tcontext st t ->
   if !debug_typing then
-    Printf.printf "%s type_asc_stat st:%s t:%s\n" (String.make !debug_print_indent '\t') (stat_str st) (type_obj_str t);
+    Printf.printf "%s type_asc_stat st:%s t:%s\n" (String.make !debug_print_indent ' ') (stat_str st) (type_obj_str t);
     incr debug_print_indent;
   let _ = match st with
   | STAT_NOOP -> None_t
@@ -314,7 +314,7 @@ and type_asc_stat = fun tcontext st t ->
 
 and type_asc_expr = fun tcontext e t ->
   if !debug_typing then
-    Printf.printf "%s type_asc_expr e:%s t:%s\n" (String.make !debug_print_indent '\t') (expr_str e) (type_obj_str t);
+    Printf.printf "%s type_asc_expr e:%s t:%s\n" (String.make !debug_print_indent ' ') (expr_str e) (type_obj_str t);
   incr debug_print_indent;
   let res = match e with
   | EXPR_LITERAL l ->
@@ -360,7 +360,7 @@ and type_asc_expr = fun tcontext e t ->
 
 and type_desc_expr = fun tcontext e ->
   if !debug_typing then
-    Printf.printf "%s type_desc_expr e:%s\n" (String.make !debug_print_indent '\t') (expr_str e);
+    Printf.printf "%s type_desc_expr e:%s\n" (String.make !debug_print_indent ' ') (expr_str e);
   incr debug_print_indent;
   let res = match e with
   | EXPR_LITERAL l -> type_desc_literal tcontext l
@@ -381,7 +381,7 @@ and type_desc_expr = fun tcontext e ->
 
 and type_of_list = fun tcontext ls tacc ->
   if !debug_typing then
-    Printf.printf "%stype_of_list ls:%s tacc:%s\n" (String.make !debug_print_indent '\t') (String.concat "; " (List.map expr_str ls)) (type_obj_str tacc);
+    Printf.printf "%stype_of_list ls:%s tacc:%s\n" (String.make !debug_print_indent ' ') (String.concat "; " (List.map expr_str ls)) (type_obj_str tacc);
   let res = begin match ls with
   | [] -> List_t (tacc)
   | hd::tl -> begin match type_desc_expr tcontext hd, tacc with
@@ -393,7 +393,7 @@ and type_of_list = fun tcontext ls tacc ->
 
 and type_desc_literal = fun tcontext l ->
   if !debug_typing then
-    Printf.printf "%stype_desc_literal l:%s\n" (String.make !debug_print_indent '\t') (lit_str l);
+    Printf.printf "%stype_desc_literal l:%s\n" (String.make !debug_print_indent ' ') (lit_str l);
   incr debug_print_indent;
   let res = match l with
   | LITERAL_INT _ -> Int_t
@@ -408,7 +408,7 @@ and type_desc_literal = fun tcontext l ->
 
 and type_function = fun tcontext argnames stf ->
   if !debug_typing then
-    Printf.printf "%stype_function argnames:%s stf:%s\n" (String.make !debug_print_indent '\t') (String.concat "; " argnames) (stat_str stf);
+    Printf.printf "%stype_function argnames:%s stf:%s\n" (String.make !debug_print_indent ' ') (String.concat "; " argnames) (stat_str stf);
   incr debug_print_indent;
   let loc_ctx = copy_tcontext tcontext in
   let arg_temp_types = List.map (fun _ -> (Unclear_t (next_unclear_id()))) argnames in
@@ -419,7 +419,7 @@ and type_function = fun tcontext argnames stf ->
 
 and type_assign = fun tcontext el elv ->
   if !debug_typing then
-    Printf.printf "%stype_assign el:%s elv:%s\n" (String.make !debug_print_indent '\t') (String.concat "; " (List.map expr_str el)) (String.concat "; "(List.map type_obj_str elv));
+    Printf.printf "%stype_assign el:%s elv:%s\n" (String.make !debug_print_indent ' ') (String.concat "; " (List.map expr_str el)) (String.concat "; "(List.map type_obj_str elv));
   incr debug_print_indent;
   let rec assign_values = fun vars values ->
     match vars, values with

@@ -31,7 +31,7 @@ Then run ```dune exec fSrepl``` to run the REPL.
 
 To install this as a dev opam package, and be able to import this in your own OCaml projects, run ```opam install .```
 
-### Testing
+#### Testing
 
 Run ```dune runtest``` to run the unittests.
 
