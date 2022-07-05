@@ -326,6 +326,7 @@ and type_asc_expr = fun tcontext e t ->
       t
     | a when is_unclear_list t && is_unclear_list a -> t
     | a when is_unclear_list a || is_unclear_list t -> a
+    | a when t = Any_t -> a
     | a -> failwith (Printf.sprintf "(Typing) literal was inferred type (%s) but has type (%s)" (type_obj_str t) (type_obj_str a)) end
   | EXPR_UNARY (uo, e) -> let te = type_asc_unop uo t in
     if te = t then let _ = type_asc_expr tcontext e te in te else failwith (Printf.sprintf "(Typing) unary operation output (%s) was inferred type (%s) but has type (%s)" (unop_str uo) (type_obj_str t) (type_obj_str te))
