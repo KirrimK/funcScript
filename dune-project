@@ -25,7 +25,8 @@
  (depends
     ocaml
     dune
-    (menhir (>= 2.1)))
+    (menhir (>= 2.1))
+    (bisect_ppx (>= 2.5.0)))
  (tags
   (functional scripting embedded language)))
 
