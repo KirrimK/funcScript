@@ -27,9 +27,15 @@ opam install funcScript
 ### Building from source
 
 Clone this repo, and in the project root, run ```dune build```. This build the library, the executable (a REPL you can use to test the language), and the tests.
-Then run ```dune exec fSrepl``` to run the REPL, or ```dune runtest``` to run the unittests.
+Then run ```dune exec fSrepl``` to run the REPL.
 
 To install this as a dev opam package, and be able to import this in your own OCaml projects, run ```opam install .```
+
+### Testing
+
+Run ```dune runtest``` to run the unittests.
+
+Run ```dune runtest --instrument-with bisect_ppx --force``` to run the unittests with coverage, then run ```bisect-ppx-report html``` to generate the html report in the _coverage folder.
 
 ## Language
 
